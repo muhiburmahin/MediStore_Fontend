@@ -4,20 +4,18 @@ import tailwindcssAnimate from "tailwindcss-animate";
 const config: Config = {
     darkMode: ["class", "class"],
     content: [
-        './pages/**/*.{ts,tsx}',
-        './components/**/*.{ts,tsx}',
-        './app/**/*.{ts,tsx}',
-        './src/**/*.{ts,tsx}',
+        "./app/**/*.{js,ts,jsx,tsx,mdx}",
+        "./components/**/*.{js,ts,jsx,tsx,mdx}",
+        "./src/**/*.{js,ts,jsx,tsx,mdx}",
     ],
     theme: {
         extend: {
             colors: {
                 brand: {
-                    DEFAULT: '#14b8a6',
-                    50: '#f0fdfa',
-                    100: '#ccfbf1',
-                    600: '#0d9488',
-                    700: '#0f766e',
+                    DEFAULT: "#98ee16",
+                    blue: "#1e40af",
+                    50: "#f7fee7",
+                    600: "#84d312",
                 },
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
