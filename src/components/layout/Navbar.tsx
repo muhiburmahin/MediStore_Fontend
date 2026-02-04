@@ -95,7 +95,7 @@ const Navbar = () => {
 
   return (
     <section className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur shadow-sm">
-      <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-4">
+      <div className="container mx-auto px-15 h-20 flex items-center justify-between gap-4">
 
         {/* --- Logo & Desktop Nav --- */}
         <div className="flex items-center gap-8">
