@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -90,10 +90,11 @@ const Navbar = () => {
               <Image src="/logo.png" alt="MediStore" width={40} height={40} className="object-contain" />
             </div>
             <span className="text-xl md:text-2xl font-black tracking-tighter hidden sm:block">
-              <span className="text-brand-blue dark:text-blue-400">
+              <span className="text-blue-600 dark:text-blue-600">
                 Medi
               </span>
-              <span className="text-brand italic dark:text-green-400">
+              {/* Store অংশটি লাইট মোডে সবুজ (বা আপনার ব্রান্ড কালার) এবং ডার্ক মোডেও সবুজ থাকবে */}
+              <span className="text-green-600 italic dark:text-green-600">
                 Store
               </span>
             </span>
@@ -174,7 +175,7 @@ const Navbar = () => {
               <SheetContent side="right" className="w-[320px] rounded-l-[30px] p-0 dark:bg-slate-950 dark:border-slate-800">
                 <SheetHeader className="p-6 border-b dark:border-slate-800 text-left">
                   <SheetTitle className="flex items-center gap-2 text-2xl font-black italic">
-                    <span className="text-brand-blue dark:text-blue-400">Medi</span>
+                    <span className="text-brand-blue dark:text-lue-40b0">Medi</span>
                     <span className="text-brand">Store</span>
                   </SheetTitle>
                 </SheetHeader>
