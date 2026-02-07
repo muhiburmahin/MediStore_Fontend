@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client"; // Better-Auth 
 import {
   Menu, ShoppingCart, UserCircle, LogOut, ChevronDown,
   LayoutDashboard, Package, Users, Store, Pill, Search, Zap
@@ -25,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ModeToggle } from "./modeTaggle";
+import { toast } from "sonner";
 
 // --- Types ---
 interface MenuItem {
@@ -36,10 +39,23 @@ interface MenuItem {
 }
 
 const Navbar = () => {
-  const [user, setUser] = useState<{ name: string; role: "ADMIN" | "SELLER" | "CUSTOMER" } | null>({
-    name: "Shohan",
-    role: "ADMIN",
-  });
+  const router = useRouter();
+
+  // Better-Auth 
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user;
+
+  const handleLogout = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success("Logged out successfully");
+          router.push("/login");
+          router.refresh();
+        },
+      },
+    });
+  };
 
   const menu: MenuItem[] = [
     { title: "Home", url: "/" },
@@ -50,20 +66,23 @@ const Navbar = () => {
         {
           title: "All Medicines",
           description: "Browse our complete catalog of OTC drugs",
-          icon: <Pill className="size-5 text-brand" />,
+          icon: <Pill className="size-5 text-blue-600" />,
           url: "/shop",
         },
         {
           title: "Healthcare",
           description: "Vitamins, supplements and daily care",
-          icon: <Zap className="size-5 text-brand" />,
+          icon: <Zap className="size-5 text-green-600" />,
           url: "/shop?category=healthcare",
         },
       ],
     },
     { title: "Flash Sale", url: "/offers" },
+
+    { title: "Dashboard", url: "/dashboard" },
   ];
 
+  //Better-Auth role base auth
   const dashboardLinks = {
     CUSTOMER: [
       { title: "My Orders", url: "/orders", icon: <Package size={16} /> },
@@ -90,15 +109,9 @@ const Navbar = () => {
               <Image src="/logo.png" alt="MediStore" width={40} height={40} className="object-contain" />
             </div>
             <span className="text-xl md:text-2xl font-black tracking-tighter hidden sm:block">
-              <span className="text-blue-600 dark:text-blue-600">
-                Medi
-              </span>
-              {/* Store অংশটি লাইট মোডে সবুজ (বা আপনার ব্রান্ড কালার) এবং ডার্ক মোডেও সবুজ থাকবে */}
-              <span className="text-green-600 italic dark:text-green-600">
-                Store
-              </span>
+              <span className="text-blue-600">Medi</span>
+              <span className="text-green-600 italic">Store</span>
             </span>
-
           </Link>
 
           <nav className="hidden lg:flex items-center">
@@ -115,7 +128,7 @@ const Navbar = () => {
           <div className="relative hidden xl:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
             <Input
-              className="pl-10 rounded-full bg-slate-100 dark:bg-slate-900 dark:text-slate-200 border-none w-64 focus-visible:ring-brand transition-all"
+              className="pl-10 rounded-full bg-slate-100 dark:bg-slate-900 dark:text-slate-200 border-none w-64 focus-visible:ring-blue-600 transition-all"
               placeholder="Search medicine..."
             />
           </div>
@@ -123,66 +136,134 @@ const Navbar = () => {
           <ModeToggle />
 
           <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative hover:bg-brand/10 dark:hover:bg-brand/20 rounded-full transition-colors group">
-              <ShoppingCart className="size-6 text-slate-700 dark:text-slate-300 group-hover:text-brand" />
-              <span className="absolute -top-1 -right-1 bg-brand text-black text-[10px] h-4.5 w-4.5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-950 font-bold">
+            <Button variant="ghost" size="icon" className="relative hover:bg-blue-600/10 dark:hover:bg-blue-600/20 rounded-full transition-colors group">
+              <ShoppingCart className="size-6 text-slate-700 dark:text-slate-300 group-hover:text-blue-600" />
+              <span className="absolute -top-1 -right-1 bg-green-600 text-white text-[10px] h-4.5 w-4.5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-950 font-bold">
                 0
               </span>
             </Button>
           </Link>
 
-          {user ? (
+          {/* --- User Section (Better-Auth Dynamic) --- */}
+          {!isPending && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="rounded-full gap-2 border-brand/20 bg-brand/5 dark:bg-brand/10 hover:bg-brand/10 dark:text-slate-200 px-2 sm:px-4 transition-all">
-                  <UserCircle className="size-5 text-brand" />
+                <Button variant="outline" className="rounded-full gap-2 border-blue-600/20 bg-blue-600/5 dark:bg-blue-600/10 hover:bg-blue-600/10 dark:text-slate-200 px-2 sm:px-4 transition-all">
+                  <UserCircle className="size-5 text-blue-600" />
                   <span className="hidden sm:inline font-bold">{user.name}</span>
                   <ChevronDown className="size-3 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-xl dark:bg-slate-900 dark:border-slate-800">
                 <DropdownMenuLabel className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-2">
-                  {user.role} Account
+                  Account Overview
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="dark:bg-slate-800" />
-                {dashboardLinks[user.role].map((link) => (
+                {/* Role base filtering*/}
+                {dashboardLinks["CUSTOMER"]?.map((link) => (
                   <DropdownMenuItem key={link.url} asChild>
-                    <Link href={link.url} className="flex items-center gap-3 p-2.5 font-bold rounded-xl cursor-pointer hover:bg-brand/10 hover:text-brand dark:text-slate-300 transition-all">
-                      <span className="text-brand/70">{link.icon}</span> {link.title}
+                    <Link href={link.url} className="flex items-center gap-3 p-2.5 font-bold rounded-xl cursor-pointer hover:bg-blue-600/10 hover:text-blue-600 dark:text-slate-300 transition-all">
+                      <span className="text-blue-600/70">{link.icon}</span> {link.title}
                     </Link>
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator className="dark:bg-slate-800" />
-                <DropdownMenuItem onClick={() => setUser(null)} className="text-red-500 font-bold p-2.5 rounded-xl cursor-pointer focus:bg-red-50 dark:focus:bg-red-950/30">
+                <DropdownMenuItem onClick={handleLogout} className="text-red-500 font-bold p-2.5 rounded-xl cursor-pointer focus:bg-red-50 dark:focus:bg-red-950/30">
                   <LogOut className="mr-2 size-4" /> Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild className="bg-brand hover:bg-brand/90 text-black rounded-full px-6 font-bold shadow-lg shadow-brand/20 active:scale-95 transition-all">
-              <Link href="/login">Join Free</Link>
-            </Button>
+            !isPending && (
+              <div className="flex items-center gap-2">
+                <Link href="/login" className="hidden sm:block">
+                  <button className="relative p-[2px] rounded-full bg-gradient-to-r from-blue-600 to-green-600 group active:scale-95 transition-all">
+                    <div className="px-6 py-1.5 rounded-full bg-white dark:bg-slate-950 group-hover:bg-transparent transition-all duration-300">
+                      <span className="font-black text-sm bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent group-hover:text-white transition-all">
+                        Login
+                      </span>
+                    </div>
+                  </button>
+                </Link>
+                <Link href="/register">
+                  <Button className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-green-600 hover:shadow-lg hover:shadow-blue-500/25 text-white rounded-full px-5 sm:px-8 font-black active:scale-95 transition-all group border-none">
+                    <span className="relative z-10">Register Now</span>
+                    <div className="absolute inset-0 w-full h-full bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12"></div>
+                  </Button>
+                </Link>
+              </div>
+            )
           )}
 
-          {/* Mobile Menu */}
+          {/* --- Mobile Menu --- */}
           <div className="lg:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-full border-slate-200 dark:border-slate-800 dark:bg-slate-900">
-                  <Menu className="size-5 dark:text-slate-200" />
+                <Button variant="outline" size="icon" className="rounded-full border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-slate-800 transition-all">
+                  <Menu className="size-6 text-slate-700 dark:text-slate-200" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[320px] rounded-l-[30px] p-0 dark:bg-slate-950 dark:border-slate-800">
-                <SheetHeader className="p-6 border-b dark:border-slate-800 text-left">
-                  <SheetTitle className="flex items-center gap-2 text-2xl font-black italic">
-                    <span className="text-brand-blue dark:text-lue-40b0">Medi</span>
-                    <span className="text-brand">Store</span>
-                  </SheetTitle>
+              <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0 border-none bg-white dark:bg-slate-950">
+                <SheetHeader className="p-6 border-b dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 relative bg-white dark:bg-slate-800 rounded-xl shadow-sm p-1">
+                      <Image src="/logo.png" alt="MediStore" fill className="object-contain" />
+                    </div>
+                    <SheetTitle className="text-2xl font-black flex items-center tracking-tight">
+                      <span className="text-blue-600">Medi</span>
+                      <span className="text-green-600 italic">Store</span>
+                    </SheetTitle>
+                  </div>
                 </SheetHeader>
-                <div className="p-6">
-                  <Accordion type="single" collapsible className="w-full">
-                    {menu.map((item) => renderMobileMenuItem(item))}
-                  </Accordion>
+
+                <div className="flex flex-col h-full overflow-y-auto">
+                  <div className="p-5">
+                    {user ? (
+                      <div className="bg-gradient-to-br from-blue-50 to-green-50 dark:from-slate-900 dark:to-slate-900 border border-blue-100 dark:border-slate-800 rounded-2xl p-4 flex items-center gap-4">
+                        <div className="size-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 text-xl uppercase">
+                          {user.name?.charAt(0)}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-black text-slate-800 dark:text-slate-100">{user.name}</span>
+                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-tighter bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-fit">
+                            Online
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <p className="text-xs font-bold text-slate-400 uppercase ml-1">Welcome Guest</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Link href="/login"><Button variant="outline" className="w-full font-bold rounded-xl border-blue-600/20 text-blue-600">Login</Button></Link>
+                          <Link href="/register"><Button className="w-full font-bold rounded-xl bg-gradient-to-r from-blue-600 to-green-600 text-white">Register</Button></Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="px-4 pb-20">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-2">Main Menu</p>
+                    <Accordion type="single" collapsible className="w-full space-y-1">
+                      {menu.map((item) => renderMobileMenuItem(item))}
+                    </Accordion>
+
+                    {user && (
+                      <div className="mt-6 pt-6 border-t dark:border-slate-800">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 mb-3">Your Account</p>
+                        <div className="grid grid-cols-1 gap-2">
+                          {dashboardLinks["CUSTOMER"]?.map((link) => (
+                            <Link key={link.url} href={link.url} className="flex items-center gap-3 p-3 font-bold rounded-xl hover:bg-blue-600/10 hover:text-blue-600 dark:text-slate-300 transition-all group">
+                              <span className="text-slate-400 group-hover:text-blue-600">{link.icon}</span>
+                              {link.title}
+                            </Link>
+                          ))}
+                          <button onClick={handleLogout} className="flex items-center gap-3 p-3 font-bold rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all mt-4">
+                            <LogOut size={18} /> Logout
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
@@ -193,17 +274,16 @@ const Navbar = () => {
   );
 };
 
-// --- Helper Components Update ---
-
+// --- Helper Components ---
 const renderMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
       <NavigationMenuItem key={item.title}>
-        <NavigationMenuTrigger className="font-bold text-slate-600 dark:text-slate-400 hover:text-brand dark:hover:text-brand bg-transparent transition-colors">
+        <NavigationMenuTrigger className="font-bold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-600 bg-transparent transition-colors">
           {item.title}
         </NavigationMenuTrigger>
         <NavigationMenuContent>
-          <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] dark:bg-slate-900">
+          <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] dark:bg-slate-900 border-none rounded-2xl shadow-2xl">
             {item.items.map((subItem) => (
               <li key={subItem.title}>
                 <NavigationMenuLink asChild>
@@ -216,10 +296,9 @@ const renderMenuItem = (item: MenuItem) => {
       </NavigationMenuItem>
     );
   }
-
   return (
     <NavigationMenuItem key={item.title}>
-      <Link href={item.url} className="group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-[15px] font-bold text-slate-600 dark:text-slate-400 transition-colors hover:text-brand dark:hover:text-brand">
+      <Link href={item.url} className="group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-[15px] font-bold text-slate-600 dark:text-slate-400 transition-colors hover:text-blue-600 dark:hover:text-blue-600">
         {item.title}
       </Link>
     </NavigationMenuItem>
@@ -227,12 +306,12 @@ const renderMenuItem = (item: MenuItem) => {
 };
 
 const SubMenuLink = ({ item }: { item: MenuItem }) => (
-  <Link href={item.url} className="flex flex-row gap-4 rounded-xl p-3 leading-none no-underline transition-all outline-none select-none hover:bg-brand/5 dark:hover:bg-brand/10 group">
-    <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg group-hover:bg-brand group-hover:text-black transition-all shadow-sm">
+  <Link href={item.url} className="flex flex-row gap-4 rounded-xl p-3 leading-none no-underline transition-all outline-none select-none hover:bg-blue-600/5 dark:hover:bg-blue-600/10 group">
+    <div className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
       {item.icon}
     </div>
     <div>
-      <div className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-brand transition-colors">{item.title}</div>
+      <div className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 transition-colors">{item.title}</div>
       {item.description && <p className="text-xs mt-1 text-slate-500 dark:text-slate-400 line-clamp-2">{item.description}</p>}
     </div>
   </Link>
@@ -245,16 +324,16 @@ const renderMobileMenuItem = (item: MenuItem) => {
         <AccordionTrigger className="text-lg py-2 font-bold hover:no-underline text-slate-700 dark:text-slate-300">{item.title}</AccordionTrigger>
         <AccordionContent className="mt-2 flex flex-col gap-2">
           {item.items.map((subItem) => (
-            <Link key={subItem.title} href={subItem.url} className="flex items-center gap-3 p-3 rounded-xl hover:bg-brand/5 dark:hover:bg-brand/10 group transition-all">
-              <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg group-hover:bg-brand transition-all">{subItem.icon}</div>
-              <div className="font-bold text-slate-800 dark:text-slate-200 text-sm group-hover:text-brand">{subItem.title}</div>
+            <Link key={subItem.title} href={subItem.url} className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-600/5 dark:hover:bg-blue-600/10 group transition-all">
+              <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg group-hover:bg-blue-600 transition-all text-blue-600 group-hover:text-white">{subItem.icon}</div>
+              <div className="font-bold text-slate-800 dark:text-slate-200 text-sm group-hover:text-blue-600">{subItem.title}</div>
             </Link>
           ))}
         </AccordionContent>
       </AccordionItem>
     );
   }
-  return <Link key={item.title} href={item.url} className="text-lg font-bold text-slate-700 dark:text-slate-300 py-3 block border-b border-slate-50 dark:border-slate-900 hover:text-brand">{item.title}</Link>;
+  return <Link key={item.title} href={item.url} className="text-lg font-bold text-slate-700 dark:text-slate-300 py-3 block border-b border-slate-50 dark:border-slate-900 hover:text-blue-600">{item.title}</Link>;
 };
 
 export { Navbar };
