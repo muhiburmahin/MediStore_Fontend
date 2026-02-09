@@ -57,29 +57,28 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
 
         {/* route maping */}
         {routes.map((group) => (
-          <SidebarGroup key={group.title} className="px-3">
-            <SidebarGroupLabel className="font-black text-[18px] py-12 tracking-tight bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent uppercase">
-              {group.title}
+          <SidebarGroup key={group.title} className="px-4">
+            <SidebarGroupLabel className="h-auto px-2 mt-8 mb-6">
+              <span className="text-[28px] font-black uppercase tracking-wider bg-gradient-to-r from-blue-500 to-green-600 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(96,165,250,0.3)]">
+                {group.title}
+              </span>
             </SidebarGroupLabel>
 
             <SidebarGroupContent>
-              <SidebarMenu className="gap-4">
+              <SidebarMenu className="gap-5">
                 {group.items?.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      className="h-auto w-full p-0 hover:bg-transparent active:bg-transparent"
-                    >
+                    <SidebarMenuButton asChild className="h-auto w-full p-0 hover:bg-transparent">
                       <Link href={item.url} className="w-full block">
-                        <div className="flex items-center p-[2px] rounded-full bg-gradient-to-r from-blue-600 to-green-500 shadow-md shadow-blue-500/10">
+                        <div className="flex items-center p-[2px] rounded-full bg-gradient-to-r from-blue-500 to-green-500 shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-shadow duration-300 hover:shadow-blue-500/20">
 
-                          <div className="flex items-center gap-3 w-full px-4 py-2 rounded-full bg-white dark:bg-slate-950">
+                          <div className="flex items-center gap-4 w-full h-[52px] px-6 rounded-full bg-white dark:bg-[#0f172a] border border-transparent dark:border-white/5">
 
-                            <div className="flex items-center justify-center text-blue-600">
-                              {item.icon || <LayoutDashboard size={20} strokeWidth={2.5} />}
+                            <div className="flex shrink-0 items-center justify-center text-blue-500 dark:text-blue-400">
+                              {item.icon || <LayoutDashboard size={22} strokeWidth={2.5} />}
                             </div>
 
-                            <span className="font-black text-[14px] tracking-tight bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent uppercase">
+                            <span className="font-black text-[15px] tracking-tight bg-gradient-to-r from-blue-500 to-green-400 bg-clip-text text-transparent uppercase truncate">
                               {item.title}
                             </span>
 
