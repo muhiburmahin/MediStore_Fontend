@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -19,6 +20,7 @@ import { sellerRoutes } from "@/routes/sellerRoute";
 import { userRoutes } from "@/routes/userRoutes";
 import { Routes } from "@/types";
 import { LayoutDashboard } from "lucide-react";
+import { NavUser } from "./nav-user";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {
@@ -94,6 +96,9 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         ))}
       </SidebarContent>
       <SidebarRail />
+      <SidebarFooter>
+        <NavUser user={user} />
+      </SidebarFooter>
     </Sidebar>
   );
 }

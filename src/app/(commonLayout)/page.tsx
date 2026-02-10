@@ -1,15 +1,29 @@
-import { Button } from "@/components/ui/button";
-import { userService } from "@/services/user.service";
+import Banner from "@/components/modules/home/Banner";
+import CategoryList from "@/components/modules/home/CategoryList";
+import MedicineList from "@/components/modules/home/FeaturedMedicines";
+import WhyChooseUs from "@/components/modules/home/WhyChooseUs";
 
 export default async function Home() {
-  const { data } = await userService.getSession();
-  //console.log(data)
   return (
-    <div className="p-10">
-      <h1 className="text-2xl font-bold">
-        User: {data ? data.user.name : "Session not found (null)"}
-      </h1>
-      <Button>Home Page</Button>
-    </div>
+    <main className="min-h-screen pb-20 space-y-16 overflow-hidden bg-white">
+
+      <section className="animate-in fade-in zoom-in duration-700">
+        <Banner />
+
+      </section>
+
+      <section className="container mx-auto py-2">
+
+        <CategoryList />
+      </section>
+
+      <section className="container mx-auto py-2 border-t border-slate-50">
+        <MedicineList />
+      </section>
+      <section className="container mx-auto py-2 border-t border-slate-50">
+        <WhyChooseUs />
+      </section>
+
+    </main>
   );
 }
