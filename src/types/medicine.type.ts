@@ -5,6 +5,7 @@ import { User } from "./user.type";
 
 
 export interface Medicine {
+    image: string;
     id: string;
     name: string;
     description: string;
@@ -16,8 +17,8 @@ export interface Medicine {
     categoryId: string;
     sellerId: string;
 
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
 
     category?: Category;
     seller?: User;

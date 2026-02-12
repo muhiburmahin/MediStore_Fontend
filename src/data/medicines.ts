@@ -19,7 +19,7 @@ export const MOCK_MEDICINES: Medicine[] = [
         name: "Ace 500mg",
         description: "Fast-acting formula for headaches, toothaches, and body pain.",
         price: 10.00,
-        stock: 8, // Low stock test
+        stock: 8,
         manufacturer: "Square Pharma",
         imageUrl: "https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=500",
         categoryId: "cat2",
@@ -45,7 +45,7 @@ export const MOCK_MEDICINES: Medicine[] = [
         name: "Bepanthen Ointment",
         description: "Protective care for baby's skin and treats nappy rashes.",
         price: 450.00,
-        stock: 20,
+        stock: 2,
         manufacturer: "Bayer",
         imageUrl: "https://images.unsplash.com/photo-1628231058260-15197c6601f4?q=80&w=500",
         categoryId: "cat3",

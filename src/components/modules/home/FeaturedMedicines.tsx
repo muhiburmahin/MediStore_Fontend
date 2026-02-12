@@ -7,11 +7,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 export default function MedicineList() {
-    // ১২টি মেডিসিন লিমিট
     const displayedMedicines = MOCK_MEDICINES.slice(0, 12);
 
     return (
-        /* bg-[#F8FAFF] ডার্ক মোডে bg-slate-950 হয়ে যাবে */
         <section className="py-24 bg-[#F8FAFF] dark:bg-slate-950 border-y border-slate-200/50 dark:border-slate-800/50 transition-colors duration-300">
             <div className="container mx-auto px-6 md:px-12">
 
@@ -25,7 +23,6 @@ export default function MedicineList() {
                         Top Selections
                     </motion.div>
 
-                    {/* text-slate-900 ডার্ক মোডে white হয়ে যাবে */}
                     <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">
                         <span className="bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent"> Featured Medicines</span>
                     </h2>

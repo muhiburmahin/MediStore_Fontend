@@ -10,7 +10,6 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ name, iconName, color }: CategoryCardProps) {
-    // ডাইনামিক আইকন রেন্ডারিং
     const IconComponent = (Icons as any)[iconName];
 
     return (

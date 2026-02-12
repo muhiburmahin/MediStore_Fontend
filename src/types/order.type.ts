@@ -26,15 +26,15 @@ export interface Order {
 }
 
 export interface OrderItem {
-    id: string;
+    id?: string;
 
-    orderId: string;
+    orderId?: string;
     medicineId: string;
 
     quantity: number;
     price: number;
 
-    createdAt: Date;
+    createdAt?: Date;
 
     order?: Order;
     medicine?: Medicine;

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -28,6 +28,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { ModeToggle } from "./modeTaggle";
 import { toast } from "sonner";
+import { useSelector } from 'react-redux';
+import { RootState } from "@/store";
 
 // --- Types ---
 interface MenuItem {
@@ -40,6 +42,18 @@ interface MenuItem {
 
 const Navbar = () => {
   const router = useRouter();
+  // const { items } = useCartStore(); 
+  const [mounted, setMounted] = useState(false);
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const cartCount = cartItems.length;
+
+  // const cart = useSelector((state: RootState) => state.cart.items);
+  //const totalCart = cart.reduce((acc, item) => acc + item.quantity, 0);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
 
   // Better-Auth 
   const { data: session, isPending } = authClient.useSession();
@@ -135,13 +149,16 @@ const Navbar = () => {
 
           <ModeToggle />
 
-          <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative hover:bg-blue-600/10 dark:hover:bg-blue-600/20 rounded-full transition-colors group">
-              <ShoppingCart className="size-6 text-slate-700 dark:text-slate-300 group-hover:text-blue-600" />
-              <span className="absolute -top-1 -right-1 bg-green-600 text-white text-[10px] h-4.5 w-4.5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-950 font-bold">
-                0
+          <Link
+            href={`/cart`}
+            className="relative mr-2 flex items-center justify-center"
+          >
+            <ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
+            {mounted && cartCount > 0 ? (
+              <span className="absolute -right-2 -top-1 bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold">
+                {cartCount}
               </span>
-            </Button>
+            ) : null}
           </Link>
 
           {/* --- User Section (Better-Auth Dynamic) --- */}
