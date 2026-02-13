@@ -15,7 +15,7 @@ export interface User {
     email: string;
     emailVerified: boolean;
     image: string | null;
-    phone: string | null;
+    phone?: string | null;
     role: Role;
     status: UserStatus;
     createdAt: string;

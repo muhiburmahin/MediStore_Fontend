@@ -6,7 +6,7 @@ export const userRoutes: Routes[] = [
         items: [
             {
                 title: "Dashboard",
-                url: "/dashboard/customer-dashboard",
+                url: "/dashboard",
             },
             {
                 title: "My Profile",

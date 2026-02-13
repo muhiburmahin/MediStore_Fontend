@@ -37,7 +37,7 @@ export interface OrderItem {
     createdAt?: Date;
 
     order?: Order;
-    medicine?: Medicine;
+    medicine?: Partial<Medicine>;
 }
 export interface CreateOrder {
     customerId: string;

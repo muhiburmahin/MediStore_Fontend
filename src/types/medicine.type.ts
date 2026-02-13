@@ -12,7 +12,7 @@ export interface Medicine {
     price: number;
     stock: number;
     manufacturer: string;
-    imageUrl: string;
+    imageUrl: string | null;
 
     categoryId: string;
     sellerId: string;
