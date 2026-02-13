@@ -1,6 +1,4 @@
 "use client";
-
-import Footer from "@/components/layout/Footer";
 import CartPage from "@/components/modules/cart/cartPage";
 import { EmptyCart } from "@/components/modules/success/EmptyCart";
 import { RootState } from "@/store";
@@ -29,7 +27,6 @@ export default function Cart() {
     return (
         <div className="container mx-auto">
             <CartPage />
-            <Footer />
         </div>
     );
 }

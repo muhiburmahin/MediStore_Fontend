@@ -79,15 +79,13 @@ const Navbar = () => {
       items: [
         {
           title: "All Medicines",
-          description: "Browse our complete catalog of OTC drugs",
           icon: <Pill className="size-5 text-blue-600" />,
           url: "/shop",
         },
         {
-          title: "Healthcare",
-          description: "Vitamins, supplements and daily care",
+          title: "Find Medisine by Category",
           icon: <Zap className="size-5 text-green-600" />,
-          url: "/shop?category=healthcare",
+          url: "/find-by-cate",
         },
       ],
     },

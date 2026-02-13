@@ -4,6 +4,6 @@ export interface Category {
     id: string;
     name: string;
     medicines?: Medicine[];
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }

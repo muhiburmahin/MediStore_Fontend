@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { CheckoutModule } from "@/components/modules/checkout/CheckoutPage";
-import Footer from "@/components/layout/Footer";
 
 export default function CheckoutPage() {
     const [mounted, setMounted] = useState(false);
@@ -15,7 +14,6 @@ export default function CheckoutPage() {
                 <CheckoutModule />
             </main>
 
-            <Footer />
         </div>
     );
 }

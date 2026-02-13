@@ -1,12 +1,13 @@
 import { Navbar } from "@/components/layout/Navbar";
+import { Providers } from "@/providers/Providers";
 
-export default async function aurhLayout({
-    children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
-    return <div>
-        <Navbar />
-        {children}
-    </div>;
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <Providers>
+            <div>
+                <Navbar />
+                {children}
+            </div>
+        </Providers>
+    );
 }

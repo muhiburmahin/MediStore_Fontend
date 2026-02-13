@@ -1,24 +1,48 @@
 "use client";
+
 import { MOCK_MEDICINES } from "@/data/medicines";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { ShoppingCart, ShieldCheck, ArrowLeft, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store";
+import { addToCart } from "@/store/slice/cartSlice";
 
 export default function MedicineDetails() {
     const { id } = useParams();
+    const dispatch = useDispatch<AppDispatch>();
+
     const medicine = MOCK_MEDICINES.find((m) => m.id === id);
 
     if (!medicine) {
-        return <div className="text-center py-20 font-bold text-red-500">Medicine not found!</div>;
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
+                <div className="text-2xl font-bold text-red-500">Medicine not found!</div>
+                <Link href="/shop" className="text-blue-600 hover:underline">Back to Shop</Link>
+            </div>
+        );
     }
+
+    const handleAddToCart = () => {
+        const serializedMedicine = {
+            ...medicine,
+            createdAt: medicine.createdAt ? String(medicine.createdAt) : "",
+            updatedAt: medicine.updatedAt ? String(medicine.updatedAt) : "",
+        };
+
+        dispatch(addToCart({
+            medicine: serializedMedicine,
+            quantity: 1
+        }));
+    };
 
     return (
         <div className="min-h-screen bg-white dark:bg-slate-950 py-12 transition-colors duration-300">
             <div className="container mx-auto px-6 md:px-12">
 
-                <Link href="/" className="inline-flex items-center text-slate-500 hover:text-blue-600 mb-10 font-bold transition-colors group">
+                <Link href="/shop" className="inline-flex items-center text-slate-500 hover:text-blue-600 mb-10 font-bold transition-colors group">
                     <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Shop
                 </Link>
 
@@ -67,15 +91,18 @@ export default function MedicineDetails() {
 
                         <div className="pt-8 border-t border-slate-100 dark:border-slate-800">
                             <div className="flex items-baseline gap-3 mb-8">
-                                <span className="text-5xl font-black text-slate-900 dark:text-white">
+                                <span className="text-5xl font-black text-slate-900 dark:text-white font-mono">
                                     ৳{medicine.price.toFixed(2)}
                                 </span>
                                 <span className="text-slate-400 font-bold uppercase text-xs tracking-widest">Per Unit</span>
                             </div>
 
-                            {/* Colorful Buttons */}
+                            {/* Action Buttons */}
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <Button className="flex-[2] h-16 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-700 hover:to-emerald-600 text-white text-lg font-black shadow-xl shadow-blue-500/25 transition-all active:scale-95">
+                                <Button
+                                    onClick={handleAddToCart} // এখানে ফাংশনটি কল করা হয়েছে
+                                    className="flex-[2] h-16 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-700 hover:to-emerald-600 text-white text-lg font-black shadow-xl shadow-blue-500/25 transition-all active:scale-95"
+                                >
                                     <ShoppingCart className="w-6 h-6 mr-3" /> Add to Cart
                                 </Button>
 
