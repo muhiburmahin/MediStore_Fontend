@@ -73,10 +73,6 @@ export const customerDashboardService = {
         ];
     },
 
-    // getDashboardStats: async (): Promise<IDashboardStats> => {
-    //     return { totalOrders: 15, pendingOrders: 2, completedOrders: 13, totalSpent: 4500 };
-    // },
-
     getUserProfile: async (): Promise<User> => {
         return {
             id: "user-123",

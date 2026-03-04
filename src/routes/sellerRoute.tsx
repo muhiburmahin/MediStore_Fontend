@@ -8,10 +8,7 @@ export const sellerRoutes: Routes[] = [
                 title: "Dashboard",
                 url: "/seller-dashboard/dashboard",
             },
-            {
-                title: "My Profile",
-                url: "/seller-dashboard/my-profile",
-            },
+
             {
                 title: "Medicines",
                 url: "/seller-dashboard/medicines",
@@ -19,6 +16,14 @@ export const sellerRoutes: Routes[] = [
             {
                 title: "Orders",
                 url: "/seller-dashboard/orders",
+            },
+            {
+                title: "My Profile",
+                url: "/seller-dashboard/my-profile",
+            },
+            {
+                title: "Go-TO-Home",
+                url: "/",
             },
         ],
     },

@@ -1,13 +1,20 @@
 "use client";
 
-import { MOCK_MEDICINES } from "@/data/medicines";
 import MedicineCard from "../shared/MedicineCard";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Medicine } from "@/types/medicine.type"; // টাইপ ইম্পোর্ট নিশ্চিত করুন
 
-export default function MedicineList() {
-    const displayedMedicines = MOCK_MEDICINES.slice(0, 12);
+interface MedicineListProps {
+    medicines: Medicine[];
+}
+
+export default function MedicineList({ medicines }: MedicineListProps) {
+    /** * যদি ব্যাকএন্ড থেকে ডাটা না আসে (খালি থাকে), 
+     * তবে এটি ডাটাবেস এরর না দিয়ে একটি ক্লিন স্লাইস রিটার্ন করবে।
+     */
+    const displayedMedicines = medicines?.slice(0, 12) || [];
 
     return (
         <section className="py-24 bg-[#F8FAFF] dark:bg-slate-950 border-y border-slate-200/50 dark:border-slate-800/50 transition-colors duration-300">
@@ -18,6 +25,7 @@ export default function MedicineList() {
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
                         className="px-5 py-1.5 text-[11px] font-black tracking-[0.3em] text-blue-600 dark:text-blue-400 uppercase bg-blue-100/50 dark:bg-blue-900/30 rounded-full"
                     >
                         Top Selections
@@ -27,7 +35,7 @@ export default function MedicineList() {
                         <span className="bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent"> Featured Medicines</span>
                     </h2>
 
-                    <div className="h-1.5 w-50 bg-gradient-to-r from-blue-600 to-green-500 rounded-full" />
+                    <div className="h-1.5 w-32 bg-gradient-to-r from-blue-600 to-green-500 rounded-full" />
 
                     <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto pt-2 font-medium">
                         Explore our premium range of essential healthcare products curated just for you.
@@ -36,16 +44,21 @@ export default function MedicineList() {
 
                 {/* Grid Section */}
                 <div className="p-2 md:p-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {displayedMedicines.map((med) => (
-                            <MedicineCard key={med.id} medicine={med} />
-                        ))}
-                    </div>
+                    {displayedMedicines.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                            {displayedMedicines.map((med) => (
+                                <MedicineCard key={med.id} medicine={med} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-20 text-slate-400 italic">
+                            No featured medicines found.
+                        </div>
+                    )}
                 </div>
 
                 {/* Footer Link & Button */}
                 <div className="mt-20 flex flex-col items-center space-y-6">
-                    {/* Divider line */}
                     <div className="h-px w-full max-w-[200px] bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent" />
 
                     <Link

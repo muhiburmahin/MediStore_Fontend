@@ -28,6 +28,10 @@ export const adminRoutes: Routes[] = [
                 title: "All Users",
                 url: "/admin-dashboard/users",
             },
+            {
+                title: "Go-TO-Home",
+                url: "/",
+            },
         ],
     },
 ];

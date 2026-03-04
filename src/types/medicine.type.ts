@@ -5,14 +5,13 @@ import { User } from "./user.type";
 
 
 export interface Medicine {
-    image: string;
     id: string;
     name: string;
     description: string;
     price: number;
     stock: number;
     manufacturer: string;
-    imageUrl: string | null;
+    images: string[]; // এখানে string[] (Array) হবে
 
     categoryId: string;
     sellerId: string;

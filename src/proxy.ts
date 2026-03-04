@@ -16,13 +16,13 @@ export async function proxy(request: NextRequest) {
 
     if (userRole === Roles.admin) {
         if (pathname.startsWith("/seller-dashboard") || pathname === "/dashboard") {
-            return NextResponse.redirect(new URL("/admin-dashboard", request.url));
+            return NextResponse.redirect(new URL("/admin-dashboard/dashboard", request.url));
         }
     }
 
     if (userRole === Roles.seller) {
         if (pathname.startsWith("/admin-dashboard") || pathname === "/dashboard") {
-            return NextResponse.redirect(new URL("/seller-dashboard", request.url));
+            return NextResponse.redirect(new URL("/seller-dashboard/dashboard", request.url));
         }
     }
 

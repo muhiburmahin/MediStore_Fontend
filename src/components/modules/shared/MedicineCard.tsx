@@ -115,12 +115,15 @@
 //     );
 // }
 
+
+
+
 "use client";
 
 import Image from "next/image";
 import { Medicine } from "@/types/medicine.type";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Heart, Info, Star, Tag } from "lucide-react";
+import { ShoppingCart, Heart, Info, Star, Tag, Images } from "lucide-react";
 import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/store/slice/cartSlice";
@@ -133,6 +136,14 @@ interface MedicineCardProps {
 
 export default function MedicineCard({ medicine }: MedicineCardProps) {
     const dispatch = useDispatch<AppDispatch>();
+
+    /** * আপনার টাইপ অনুযায়ী medicine.images একটি অ্যারে। 
+     * প্রথম ইমেজটি দেখানোর জন্য images[0] ব্যবহার করা হয়েছে।
+     * ইমেজ না থাকলে একটি ডিফল্ট স্ট্রিং রাখা হয়েছে।
+     */
+    const displayImage = medicine.image && medicine.image.length > 0
+        ? medicine.image[0]
+        : "/placeholder-medicine.png";
 
     const handleAddToCart = () => {
         const serializedMedicine = {
@@ -155,23 +166,30 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
             whileHover={{ y: -5 }}
             className="group relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
         >
-            {/* Top Action Buttons (Wishlist) */}
-            <div className="absolute top-4 right-4 z-10">
-                <button className="p-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-100 dark:border-slate-700 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-colors">
+            {/* Wishlist & Image Indicator */}
+            <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                <button className="p-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-100 dark:border-slate-700 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-colors shadow-sm">
                     <Heart className="w-4 h-4" />
                 </button>
+
+                {/* একাধিক ছবি থাকলে ইন্ডিকেটর দেখাবে */}
+                {medicine.image && medicine.image.length > 1 && (
+                    <div className="p-2 rounded-full bg-blue-600 text-white shadow-lg animate-pulse">
+                        <Images className="w-3.5 h-3.5" />
+                    </div>
+                )}
             </div>
 
             {/* Product Image Section */}
             <Link href={`/medicine/${medicine.id}`}>
                 <div className="relative h-52 w-full bg-[#F8FAFC] dark:bg-slate-800/50 overflow-hidden cursor-pointer">
                     <Image
-                        src={medicine.imageUrl}
+                        src={displayImage}
                         alt={medicine.name}
                         fill
                         className="object-contain p-6 group-hover:scale-110 transition-transform duration-500"
                     />
-                    {/* Stock Status Badge */}
+
                     {medicine.stock < 10 && (
                         <div className="absolute bottom-2 left-2 bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-sm">
                             Low Stock: {medicine.stock}
@@ -182,7 +200,6 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
 
             {/* Content Section */}
             <div className="p-5 space-y-3">
-                {/* Manufacturer & Rating */}
                 <div className="flex justify-between items-center">
                     <div className="flex flex-col gap-1">
                         <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded w-fit">
@@ -191,7 +208,8 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
 
                         <div className="flex items-center gap-1 text-[10px] font-medium text-slate-400 dark:text-slate-500">
                             <Tag className="w-2.5 h-2.5" />
-                            <span>{typeof medicine.category === 'object' ? medicine.category.name : (medicine.category || "General")}</span>
+                            {/* টাইপ অনুযায়ী সরাসরি ক্যাটাগরি অবজেক্ট থেকে নাম নেওয়া হচ্ছে */}
+                            <span>{medicine.category?.name || "General"}</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -200,7 +218,6 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
                     </div>
                 </div>
 
-                {/* Name & Description */}
                 <div>
                     <Link href={`/medicine/${medicine.id}`}>
                         <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors cursor-pointer">
@@ -212,7 +229,7 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
                     </p>
                 </div>
 
-                {/* Price Section */}
+                {/* Price & Cart Section */}
                 <div className="flex items-end justify-between pt-2">
                     <div className="flex flex-col">
                         <span className="text-[10px] text-slate-400 font-medium italic">Price</span>
@@ -221,11 +238,10 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
                         </span>
                     </div>
 
-                    {/* Add to Cart Button */}
                     <Button
                         onClick={handleAddToCart}
                         size="sm"
-                        className="rounded-xl bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg shadow-blue-200 dark:shadow-none transition-all active:scale-95 group/btn"
+                        className="rounded-xl bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 shadow-lg transition-all active:scale-95 group/btn"
                     >
                         <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-bounce" />
                         Add
@@ -233,8 +249,8 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
                 </div>
             </div>
 
-            {/* Quick Info Hover Overlay */}
-            <div className="absolute inset-x-0 bottom-[100px] flex justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+            {/* Details Hover Button */}
+            <div className="absolute inset-x-0 bottom-[100px] flex justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 pointer-events-none group-hover:pointer-events-auto">
                 <Link href={`/medicine/${medicine.id}`}>
                     <button className="flex items-center gap-2 bg-slate-900/90 dark:bg-slate-700/90 backdrop-blur-md text-white text-[10px] px-4 py-2 rounded-full shadow-2xl border border-white/10">
                         <Info className="w-3 h-3" />

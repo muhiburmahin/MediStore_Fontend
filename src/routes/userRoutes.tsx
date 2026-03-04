@@ -16,6 +16,10 @@ export const userRoutes: Routes[] = [
                 title: "My Orders",
                 url: "/dashboard/my-orders",
             },
+            {
+                title: "Go-TO-Home",
+                url: "/",
+            },
         ],
     },
 ];
