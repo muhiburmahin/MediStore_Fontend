@@ -2,49 +2,39 @@ import Banner from "@/components/modules/home/Banner";
 import CategoryList from "@/components/modules/home/CategoryList";
 import MedicineList from "@/components/modules/home/FeaturedMedicines";
 import WhyChooseUs from "@/components/modules/home/WhyChooseUs";
-
-// সঠিক টাইপগুলো ইম্পোর্ট করুন
-import { MOCK_CATEGORIES } from "@/data/categories";
-import { MOCK_MEDICINES } from "@/data/medicines";
-import { Medicine } from "@/types/medicine.type";
-import { Category } from "@/types/category.type";
-
-/**
- * যেহেতু ডেমো ডাটায় iconName বা color এর মতো অতিরিক্ত ফিল্ড থাকতে পারে, 
- * তাই আমরা টাইপ কাস্টিং এর বদলে সরাসরি টাইপ ডিফাইন করে দিচ্ছি।
- */
-interface ExtendedCategory extends Category {
-  iconName?: string;
-  color?: string;
-}
+import { fetchAllCategories } from "@/actions/category.action";
+import { fetchAllMedicines } from "@/actions/medicine.action"; // অ্যাকশন ইমপোর্ট করুন
 
 export default async function Home() {
-  // ডেমো ডাটাকে তাদের সঠিক টাইপে অ্যাসাইন করা হচ্ছে (any ছাড়া)
-  const categories: ExtendedCategory[] = MOCK_CATEGORIES;
-  const medicines: Medicine[] = MOCK_MEDICINES;
+  const categoriesRes = await fetchAllCategories();
+  const medicinesRes = await fetchAllMedicines({ limit: "8" });
+
+  // অ্যাকশন থেকে আসা প্রপার ডাটা সেট করা হচ্ছে
+  const categories = categoriesRes?.data || [];
+  const medicines = medicinesRes?.data || [];
 
   return (
-    <main className="min-h-screen pb-20 space-y-16 overflow-hidden bg-white dark:bg-slate-950 transition-colors duration-300">
+    <main className="min-h-screen pb-20 bg-white dark:bg-slate-950 transition-colors duration-300">
 
       {/* Hero Banner Section */}
-      <section className="animate-in fade-in zoom-in duration-700">
+      <div className="animate-in fade-in zoom-in duration-700">
         <Banner />
-      </section>
+      </div>
 
       {/* Category List Section */}
-      <section className="container mx-auto py-2">
+      <div className="py-8">
         <CategoryList categories={categories} />
-      </section>
+      </div>
 
       {/* Featured Medicines Section */}
-      <section className="container mx-auto py-2 border-t border-slate-50 dark:border-slate-900">
+      <div className="py-8 bg-slate-50/50 dark:bg-slate-900/20">
         <MedicineList medicines={medicines} />
-      </section>
+      </div>
 
       {/* Why Choose Us Section */}
-      <section className="container mx-auto py-2 border-t border-slate-50 dark:border-slate-900">
+      <div className="py-8">
         <WhyChooseUs />
-      </section>
+      </div>
 
     </main>
   );

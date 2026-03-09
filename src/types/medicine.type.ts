@@ -11,19 +11,19 @@ export interface Medicine {
     price: number;
     stock: number;
     manufacturer: string;
-    images: string[]; // এখানে string[] (Array) হবে
-
+    images: string[];
     categoryId: string;
     sellerId: string;
-
-    createdAt: string;
-    updatedAt: string;
-
+    createdAt: string | Date;
+    updatedAt: string | Date;
+    averageRating?: number;
+    totalReviews?: number;
     category?: Category;
     seller?: User;
     orderItems?: OrderItem[];
     reviews?: Review[];
 }
+
 
 export interface CreateMedicine {
     name: string;
@@ -31,10 +31,11 @@ export interface CreateMedicine {
     price: number;
     stock: number;
     manufacturer: string;
-    imageUrl: string;
+    images: string[];
     categoryId: string;
     sellerId: string;
 }
+
 
 export interface UpdateMedicine {
     name?: string;
@@ -42,5 +43,18 @@ export interface UpdateMedicine {
     price?: number;
     stock?: number;
     manufacturer?: string;
-    imageUrl?: string;
+    images?: string[];
+    categoryId?: string;
+}
+
+export interface MedicineResponse {
+    success: boolean;
+    data: Medicine[];
+    meta?: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPage: number;
+    } | null;
+    error?: string;
 }

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 
 const API_URL = env.API_URL;
 
+
 export const categoryService = {
     addCategory: async (name: string) => {
         try {
@@ -40,34 +41,37 @@ export const categoryService = {
             };
         }
     },
-    getAllCategorys: async () => {
+
+    getAllCategories: async () => {
         try {
             const cookieStore = await cookies();
-
             const res = await fetch(`${API_URL}/categories`, {
                 headers: {
                     Cookie: cookieStore.toString(),
                 },
-                cache: "no-store",
                 next: { tags: ["categories"] },
+                cache: "no-store",
             });
-            const session = await res.json();
-            if (session === null) {
+
+            const response = await res.json();
+
+            // ব্যাকএন্ড response.data তে ক্যাটাগরি লিস্ট থাকে
+            if (!res.ok || !response.success) {
                 return {
                     data: null,
-                    error: { message: "No category found", error: null },
+                    error: { message: response.message || "No category found" },
                 };
             }
 
-            return { data: session, error: null };
+            return { data: response.data, error: null };
         } catch (error) {
-            console.log(error);
             return {
                 data: null,
                 error: { message: "Something went wrong", error },
             };
         }
     },
+
     deleteCategory: async (id: string) => {
         try {
             const cookieStore = await cookies();

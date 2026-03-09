@@ -582,242 +582,242 @@
 
 
 
-"use client";
+// "use client";
 
-import { Edit, Eye, Trash, Package, DollarSign, Factory } from "lucide-react";
-import { Medicine } from "../../../../types";
-import { Button } from "../../../ui/button";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "../../../ui/table";
-import { useState } from "react";
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "../../../ui/dialog";
-import { Input } from "../../../ui/input";
-import { Label } from "../../../ui/label";
-import { z } from "zod";
-import { useForm } from "@tanstack/react-form";
-import { toast } from "sonner";
-import { Textarea } from "../../../ui/textarea";
-import {
-    deleteMedicine,
-    updateMedicine,
-} from "../../../../actions/medicine.action";
-import Image from "next/image";
+// import { Edit, Eye, Trash, Package, DollarSign, Factory } from "lucide-react";
+// import { Medicine } from "../../../../types";
+// import { Button } from "../../../ui/button";
+// import {
+//     Table,
+//     TableBody,
+//     TableCell,
+//     TableHead,
+//     TableHeader,
+//     TableRow,
+// } from "../../../ui/table";
+// import { useState } from "react";
+// import {
+//     Dialog,
+//     DialogContent,
+//     DialogFooter,
+//     DialogHeader,
+//     DialogTitle,
+// } from "../../../ui/dialog";
+// import { Input } from "../../../ui/input";
+// import { Label } from "../../../ui/label";
+// import { z } from "zod";
+// import { useForm } from "@tanstack/react-form";
+// import { toast } from "sonner";
+// import { Textarea } from "../../../ui/textarea";
+// import {
+//     deleteMedicine,
+//     updateMedicine,
+// } from "../../../../actions/medicine.action";
+// import Image from "next/image";
 
-// ফর্ম ভ্যালিডেশন স্কিমা
-const medicineSchema = z.object({
-    name: z.string().min(3, "Name must be at least 3 characters"),
-    description: z.string().min(5, "Description must be at least 5 characters"),
-    price: z.number().min(1, "Price must be at least 1"),
-    stock: z.number().min(0, "Stock cannot be negative"),
-    manufacturer: z.string().min(2, "Manufacturer is required"),
-    imageUrl: z.string().url("Invalid image URL"),
-});
+// // ফর্ম ভ্যালিডেশন স্কিমা
+// const medicineSchema = z.object({
+//     name: z.string().min(3, "Name must be at least 3 characters"),
+//     description: z.string().min(5, "Description must be at least 5 characters"),
+//     price: z.number().min(1, "Price must be at least 1"),
+//     stock: z.number().min(0, "Stock cannot be negative"),
+//     manufacturer: z.string().min(2, "Manufacturer is required"),
+//     imageUrl: z.string().url("Invalid image URL"),
+// });
 
-export default function MedicineTable({ medicines }: { medicines: Medicine[] }) {
-    const [isEditOpen, setIsEditOpen] = useState(false);
-    const [isViewOpen, setIsViewOpen] = useState(false);
-    const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null);
+// export default function MedicineTable({ medicines }: { medicines: Medicine[] }) {
+//     const [isEditOpen, setIsEditOpen] = useState(false);
+//     const [isViewOpen, setIsViewOpen] = useState(false);
+//     const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null);
 
-    // TanStack Form লজিক - আপডেট করার জন্য
-    const form = useForm({
-        defaultValues: {
-            name: "",
-            description: "",
-            price: 0,
-            stock: 0,
-            manufacturer: "",
-            imageUrl: "",
-        },
-        onSubmit: async ({ value }) => {
-            if (!selectedMedicine) return;
-            const toastId = toast.loading("Updating medicine info...");
-            try {
-                const { data, error } = await updateMedicine(selectedMedicine.id, value);
-                if (error) {
-                    toast.error(error.message, { id: toastId });
-                    return;
-                }
-                toast.success(data?.message || "Medicine updated successfully!", { id: toastId });
-                setIsEditOpen(false);
-                setSelectedMedicine(null);
-            } catch (err) {
-                toast.error("Something went wrong!", { id: toastId });
-            }
-        },
-    });
+//     // TanStack Form লজিক - আপডেট করার জন্য
+//     const form = useForm({
+//         defaultValues: {
+//             name: "",
+//             description: "",
+//             price: 0,
+//             stock: 0,
+//             manufacturer: "",
+//             imageUrl: "",
+//         },
+//         onSubmit: async ({ value }) => {
+//             if (!selectedMedicine) return;
+//             const toastId = toast.loading("Updating medicine info...");
+//             try {
+//                 const { data, error } = await updateMedicine(selectedMedicine.id, value);
+//                 if (error) {
+//                     toast.error(error.message, { id: toastId });
+//                     return;
+//                 }
+//                 toast.success(data?.message || "Medicine updated successfully!", { id: toastId });
+//                 setIsEditOpen(false);
+//                 setSelectedMedicine(null);
+//             } catch (err) {
+//                 toast.error("Something went wrong!", { id: toastId });
+//             }
+//         },
+//     });
 
-    // View Details ওপেন করার ফাংশন
-    const handleView = (medicine: Medicine) => {
-        setSelectedMedicine(medicine);
-        setIsViewOpen(true);
-    };
+//     // View Details ওপেন করার ফাংশন
+//     const handleView = (medicine: Medicine) => {
+//         setSelectedMedicine(medicine);
+//         setIsViewOpen(true);
+//     };
 
-    // Edit Modal ওপেন এবং ফর্মের ভ্যালু সেট করার ফাংশন
-    const handleEditClick = (medicine: Medicine) => {
-        setSelectedMedicine(medicine);
-        form.setFieldValue("name", medicine.name);
-        form.setFieldValue("description", medicine.description);
-        form.setFieldValue("price", medicine.price);
-        form.setFieldValue("stock", medicine.stock);
-        form.setFieldValue("manufacturer", medicine.manufacturer);
-        form.setFieldValue("imageUrl", medicine.imageUrl || "");
-        setIsEditOpen(true);
-    };
+//     // Edit Modal ওপেন এবং ফর্মের ভ্যালু সেট করার ফাংশন
+//     const handleEditClick = (medicine: Medicine) => {
+//         setSelectedMedicine(medicine);
+//         form.setFieldValue("name", medicine.name);
+//         form.setFieldValue("description", medicine.description);
+//         form.setFieldValue("price", medicine.price);
+//         form.setFieldValue("stock", medicine.stock);
+//         form.setFieldValue("manufacturer", medicine.manufacturer);
+//         form.setFieldValue("imageUrl", medicine.imageUrl || "");
+//         setIsEditOpen(true);
+//     };
 
-    // Delete করার ফাংশন
-    const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this medicine?")) return;
+//     // Delete করার ফাংশন
+//     const handleDelete = async (id: string) => {
+//         if (!confirm("Are you sure you want to delete this medicine?")) return;
 
-        const toastId = toast.loading("Deleting medicine...");
-        try {
-            const { data, error } = await deleteMedicine(id);
-            if (error) {
-                toast.error(error.message, { id: toastId });
-                return;
-            }
-            toast.success(data.message || "Deleted successfully", { id: toastId });
-        } catch (error) {
-            toast.error("Failed to delete medicine", { id: toastId });
-        }
-    };
+//         const toastId = toast.loading("Deleting medicine...");
+//         try {
+//             const { data, error } = await deleteMedicine(id);
+//             if (error) {
+//                 toast.error(error.message, { id: toastId });
+//                 return;
+//             }
+//             toast.success(data.message || "Deleted successfully", { id: toastId });
+//         } catch (error) {
+//             toast.error("Failed to delete medicine", { id: toastId });
+//         }
+//     };
 
-    return (
-        <div className="w-full space-y-4">
-            <div className="rounded-xl border border-blue-100 shadow-sm overflow-hidden bg-white dark:bg-black">
-                <Table>
-                    <TableHeader className="bg-blue-600">
-                        <TableRow className="hover:bg-blue-600 italic">
-                            <TableHead className="text-white w-[80px]">SL</TableHead>
-                            <TableHead className="text-white">Medicine Name</TableHead>
-                            <TableHead className="text-white text-center">Price</TableHead>
-                            <TableHead className="text-white text-center">Stock</TableHead>
-                            <TableHead className="text-white text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {!medicines || medicines.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                                    No medicines found.
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            medicines.map((medicine, index) => (
-                                <TableRow key={medicine.id} className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
-                                    <TableCell className="font-medium text-blue-600 italic">#{index + 1}</TableCell>
-                                    <TableCell className="font-semibold">{medicine.name}</TableCell>
-                                    <TableCell className="text-center font-bold text-green-600">৳{medicine.price}</TableCell>
-                                    <TableCell className="text-center">
-                                        <span className={`px-2 py-1 rounded-md text-xs font-bold ${medicine.stock > 5 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                            {medicine.stock}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="text-right flex justify-end gap-2">
-                                        <Button size="icon" variant="outline" className="h-8 w-8 border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white" onClick={() => handleView(medicine)}>
-                                            <Eye size={14} />
-                                        </Button>
-                                        <Button size="icon" variant="outline" className="h-8 w-8 border-green-200 text-green-600 hover:bg-green-600 hover:text-white" onClick={() => handleEditClick(medicine)}>
-                                            <Edit size={14} />
-                                        </Button>
-                                        <Button size="icon" variant="outline" className="h-8 w-8 border-red-200 text-red-600 hover:bg-red-600 hover:text-white" onClick={() => handleDelete(medicine.id)}>
-                                            <Trash size={14} />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+//     return (
+//         <div className="w-full space-y-4">
+//             <div className="rounded-xl border border-blue-100 shadow-sm overflow-hidden bg-white dark:bg-black">
+//                 <Table>
+//                     <TableHeader className="bg-blue-600">
+//                         <TableRow className="hover:bg-blue-600 italic">
+//                             <TableHead className="text-white w-[80px]">SL</TableHead>
+//                             <TableHead className="text-white">Medicine Name</TableHead>
+//                             <TableHead className="text-white text-center">Price</TableHead>
+//                             <TableHead className="text-white text-center">Stock</TableHead>
+//                             <TableHead className="text-white text-right">Actions</TableHead>
+//                         </TableRow>
+//                     </TableHeader>
+//                     <TableBody>
+//                         {!medicines || medicines.length === 0 ? (
+//                             <TableRow>
+//                                 <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+//                                     No medicines found.
+//                                 </TableCell>
+//                             </TableRow>
+//                         ) : (
+//                             medicines.map((medicine, index) => (
+//                                 <TableRow key={medicine.id} className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+//                                     <TableCell className="font-medium text-blue-600 italic">#{index + 1}</TableCell>
+//                                     <TableCell className="font-semibold">{medicine.name}</TableCell>
+//                                     <TableCell className="text-center font-bold text-green-600">৳{medicine.price}</TableCell>
+//                                     <TableCell className="text-center">
+//                                         <span className={`px-2 py-1 rounded-md text-xs font-bold ${medicine.stock > 5 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+//                                             {medicine.stock}
+//                                         </span>
+//                                     </TableCell>
+//                                     <TableCell className="text-right flex justify-end gap-2">
+//                                         <Button size="icon" variant="outline" className="h-8 w-8 border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white" onClick={() => handleView(medicine)}>
+//                                             <Eye size={14} />
+//                                         </Button>
+//                                         <Button size="icon" variant="outline" className="h-8 w-8 border-green-200 text-green-600 hover:bg-green-600 hover:text-white" onClick={() => handleEditClick(medicine)}>
+//                                             <Edit size={14} />
+//                                         </Button>
+//                                         <Button size="icon" variant="outline" className="h-8 w-8 border-red-200 text-red-600 hover:bg-red-600 hover:text-white" onClick={() => handleDelete(medicine.id)}>
+//                                             <Trash size={14} />
+//                                         </Button>
+//                                     </TableCell>
+//                                 </TableRow>
+//                             ))
+//                         )}
+//                     </TableBody>
+//                 </Table>
+//             </div>
 
-            {/* --- VIEW MODAL --- */}
-            <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-                <DialogContent className="sm:max-w-[450px] border-t-8 border-blue-600">
-                    <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold text-blue-600 flex items-center gap-2">
-                            <Package /> Medicine Details
-                        </DialogTitle>
-                    </DialogHeader>
-                    {selectedMedicine && (
-                        <div className="space-y-6 py-4">
-                            <div className="flex flex-col items-center">
-                                <div className="relative h-40 w-40 rounded-2xl border-4 border-blue-50 overflow-hidden bg-slate-100">
-                                    <Image src={selectedMedicine.imageUrl || "https://placehold.co/400x400?text=Medicine"} alt={selectedMedicine.name} fill className="object-cover" />
-                                </div>
-                                <h3 className="mt-4 text-xl font-bold">{selectedMedicine.name}</h3>
-                                <p className="text-blue-500 font-medium">{selectedMedicine.manufacturer}</p>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100">
-                                    <p className="text-xs text-blue-600 font-bold uppercase">Price</p>
-                                    <p className="text-lg font-black text-blue-900 dark:text-blue-100">৳{selectedMedicine.price}</p>
-                                </div>
-                                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100">
-                                    <p className="text-xs text-green-600 font-bold uppercase">Stock Available</p>
-                                    <p className="text-lg font-black text-green-900 dark:text-green-100">{selectedMedicine.stock} Pcs</p>
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-blue-600 font-bold">Description</Label>
-                                <p className="text-sm text-muted-foreground bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border italic">
-                                    {selectedMedicine.description}
-                                </p>
-                            </div>
-                        </div>
-                    )}
-                </DialogContent>
-            </Dialog>
+//             {/* --- VIEW MODAL --- */}
+//             <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+//                 <DialogContent className="sm:max-w-[450px] border-t-8 border-blue-600">
+//                     <DialogHeader>
+//                         <DialogTitle className="text-2xl font-bold text-blue-600 flex items-center gap-2">
+//                             <Package /> Medicine Details
+//                         </DialogTitle>
+//                     </DialogHeader>
+//                     {selectedMedicine && (
+//                         <div className="space-y-6 py-4">
+//                             <div className="flex flex-col items-center">
+//                                 <div className="relative h-40 w-40 rounded-2xl border-4 border-blue-50 overflow-hidden bg-slate-100">
+//                                     <Image src={selectedMedicine.imageUrl || "https://placehold.co/400x400?text=Medicine"} alt={selectedMedicine.name} fill className="object-cover" />
+//                                 </div>
+//                                 <h3 className="mt-4 text-xl font-bold">{selectedMedicine.name}</h3>
+//                                 <p className="text-blue-500 font-medium">{selectedMedicine.manufacturer}</p>
+//                             </div>
+//                             <div className="grid grid-cols-2 gap-4">
+//                                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100">
+//                                     <p className="text-xs text-blue-600 font-bold uppercase">Price</p>
+//                                     <p className="text-lg font-black text-blue-900 dark:text-blue-100">৳{selectedMedicine.price}</p>
+//                                 </div>
+//                                 <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100">
+//                                     <p className="text-xs text-green-600 font-bold uppercase">Stock Available</p>
+//                                     <p className="text-lg font-black text-green-900 dark:text-green-100">{selectedMedicine.stock} Pcs</p>
+//                                 </div>
+//                             </div>
+//                             <div className="space-y-2">
+//                                 <Label className="text-blue-600 font-bold">Description</Label>
+//                                 <p className="text-sm text-muted-foreground bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border italic">
+//                                     {selectedMedicine.description}
+//                                 </p>
+//                             </div>
+//                         </div>
+//                     )}
+//                 </DialogContent>
+//             </Dialog>
 
-            {/* --- EDIT MODAL --- */}
-            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="sm:max-w-[500px] border-t-8 border-green-600">
-                    <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold text-green-600">Update Medicine</DialogTitle>
-                    </DialogHeader>
-                    <form
-                        onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }}
-                        className="space-y-4"
-                    >
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2 col-span-2">
-                                <Label>Medicine Name</Label>
-                                <form.Field name="name">{(f) => <Input value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} />}</form.Field>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Price (৳)</Label>
-                                <form.Field name="price">{(f) => <Input type="number" value={f.state.value} onChange={(e) => f.handleChange(Number(e.target.value))} />}</form.Field>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Stock Count</Label>
-                                <form.Field name="stock">{(f) => <Input type="number" value={f.state.value} onChange={(e) => f.handleChange(Number(e.target.value))} />}</form.Field>
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Manufacturer</Label>
-                            <form.Field name="manufacturer">{(f) => <Input value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} />}</form.Field>
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Description</Label>
-                            <form.Field name="description">{(f) => <Textarea value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} />}</form.Field>
-                        </div>
-                        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-lg">
-                            Update Medicine Information
-                        </Button>
-                    </form>
-                </DialogContent>
-            </Dialog>
-        </div>
-    );
-}
+//             {/* --- EDIT MODAL --- */}
+//             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+//                 <DialogContent className="sm:max-w-[500px] border-t-8 border-green-600">
+//                     <DialogHeader>
+//                         <DialogTitle className="text-2xl font-bold text-green-600">Update Medicine</DialogTitle>
+//                     </DialogHeader>
+//                     <form
+//                         onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }}
+//                         className="space-y-4"
+//                     >
+//                         <div className="grid grid-cols-2 gap-4">
+//                             <div className="space-y-2 col-span-2">
+//                                 <Label>Medicine Name</Label>
+//                                 <form.Field name="name">{(f) => <Input value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} />}</form.Field>
+//                             </div>
+//                             <div className="space-y-2">
+//                                 <Label>Price (৳)</Label>
+//                                 <form.Field name="price">{(f) => <Input type="number" value={f.state.value} onChange={(e) => f.handleChange(Number(e.target.value))} />}</form.Field>
+//                             </div>
+//                             <div className="space-y-2">
+//                                 <Label>Stock Count</Label>
+//                                 <form.Field name="stock">{(f) => <Input type="number" value={f.state.value} onChange={(e) => f.handleChange(Number(e.target.value))} />}</form.Field>
+//                             </div>
+//                         </div>
+//                         <div className="space-y-2">
+//                             <Label>Manufacturer</Label>
+//                             <form.Field name="manufacturer">{(f) => <Input value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} />}</form.Field>
+//                         </div>
+//                         <div className="space-y-2">
+//                             <Label>Description</Label>
+//                             <form.Field name="description">{(f) => <Textarea value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} />}</form.Field>
+//                         </div>
+//                         <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-lg">
+//                             Update Medicine Information
+//                         </Button>
+//                     </form>
+//                 </DialogContent>
+//             </Dialog>
+//         </div>
+//     );
+// }

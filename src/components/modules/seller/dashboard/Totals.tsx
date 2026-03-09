@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useMemo } from "react";
 import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from "recharts";
