@@ -17,6 +17,7 @@ function CartSync() {
         if (savedCart.length > 0) {
             dispatch(hydrateCart(savedCart));
         }
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsInitialized(true);
     }, [dispatch]);
 

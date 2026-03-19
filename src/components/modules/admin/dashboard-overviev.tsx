@@ -1,205 +1,167 @@
-// src/components/modules/admin/DashboardOverview.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
 import React from 'react';
 import {
-    Users,
-    ShoppingBag,
-    Pill,
-    Layers,
-    TrendingUp,
-    CheckCircle2,
-    Clock,
-    XCircle,
-    Truck
+    Users, ShoppingBag, Pill, TrendingUp,
+    CheckCircle2, Clock, XCircle, Truck, Layers,
+    Star
 } from 'lucide-react';
 
-interface DashboardStats {
-    user: {
+// --- Types & Interfaces ---
+export type OrderStatusKey = 'PLACED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REVIEWS';
+export interface StatusData { count: number; amount: number; }
+export interface DashboardStats {
+    revenue: number;
+    users: { total: number; customers: number; sellers: number; };
+    inventory: { medicines: number; categories: number; };
+    orders: {
         total: number;
-        customer: number;
-        seller: number;
-        admin: number;
+        statusSummary: Record<Exclude<OrderStatusKey, 'REVIEWS'>, StatusData>;
     };
-    category: {
-        total: number;
-    };
-    medicine: {
-        total: number;
-    };
-    order: {
-        total: number;
-        placed: number;
-        processing: number;
-        shipped: number;
-        delivered: number;
-        cancelled: number;
-        placedAmount: number;
-        processingAmount: number;
-        shippedAmount: number;
-        deliveredAmount: number;
-        cancelledAmount: number;
-    };
-    review: {
-        total: number;
-    };
+    reviews: number;
 }
+interface DashboardProps { stats: DashboardStats; }
 
-interface Props {
-    stats: DashboardStats;
-}
+const DashboardOverview: React.FC<DashboardProps> = ({ stats }) => {
+    if (!stats) return (
+        <div className="p-10 text-center font-black text-slate-400 animate-pulse">
+            LOADING DASHBOARD...
+        </div>
+    );
 
-const DashboardOverview: React.FC<Props> = ({ stats }) => {
-    const { user, category, medicine, order, review } = stats;
-
-    const topCards = [
-        {
-            title: "Total Revenue",
-            value: `৳${order.deliveredAmount.toLocaleString()}`,
-            description: "From delivered orders",
-            icon: <TrendingUp className="w-6 h-6 text-white" />,
-            bgColor: "bg-green-600",
-            textColor: "text-white"
-        },
-        {
-            title: "Total Orders",
-            value: order.total,
-            description: `${order.delivered} completed orders`,
-            icon: <ShoppingBag className="w-6 h-6 text-white" />,
-            bgColor: "bg-blue-600",
-            textColor: "text-white"
-        },
-        {
-            title: "Active Users",
-            value: user.total,
-            description: `${user.customer} customers & ${user.seller} sellers`,
-            icon: <Users className="w-6 h-6 text-white" />,
-            bgColor: "bg-blue-600",
-            textColor: "text-white"
-        },
-        {
-            title: "Inventory",
-            value: medicine.total,
-            description: `Across ${category.total} categories`,
-            icon: <Pill className="w-6 h-6 text-white" />,
-            bgColor: "bg-green-600",
-            textColor: "text-white"
-        }
-    ];
+    // স্ট্যাটাস বক্সের জন্য ডাইনামিক কালার কনফিগারেশন (Dark Mode Compatible)
+    const statusConfigs: Record<OrderStatusKey, { bgColor: string; icon: any; textColor: string }> = {
+        PLACED: { bgColor: "bg-orange-50 dark:bg-orange-950/30", textColor: "text-orange-600 dark:text-orange-400", icon: Clock },
+        PROCESSING: { bgColor: "bg-blue-50 dark:bg-blue-950/30", textColor: "text-blue-600 dark:text-blue-400", icon: Layers },
+        SHIPPED: { bgColor: "bg-purple-50 dark:bg-purple-950/30", textColor: "text-purple-600 dark:text-purple-400", icon: Truck },
+        DELIVERED: { bgColor: "bg-emerald-50 dark:bg-emerald-950/30", textColor: "text-emerald-600 dark:text-emerald-400", icon: CheckCircle2 },
+        CANCELLED: { bgColor: "bg-red-50 dark:bg-red-950/30", textColor: "text-red-600 dark:text-red-400", icon: XCircle },
+        REVIEWS: { bgColor: "bg-teal-50 dark:bg-teal-950/30", textColor: "text-teal-600 dark:text-teal-400", icon: Star },
+    };
 
     return (
-        <div className="p-6 space-y-8 bg-slate-50 min-h-screen">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-slate-800 border-b-4 border-blue-600 pb-1">Admin Dashboard</h1>
-                <p className="text-sm text-white font-medium bg-green-600 px-4 py-1.5 rounded-full shadow-lg">
-                    Real-time Statistics
-                </p>
+        <div className="p-4 md:p-8 space-y-8 bg-slate-50 dark:bg-slate-950 min-h-screen transition-colors duration-300">
+
+            {/* --- Summary Cards Section --- */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                <SummaryCard
+                    title="TOTAL REVENUE"
+                    value={`৳${stats.revenue.toLocaleString()}`}
+                    desc="Delivered earnings"
+                    color="bg-blue-600"
+                    icon={<TrendingUp />}
+                />
+                <SummaryCard
+                    title="TOTAL ORDERS"
+                    value={stats.orders.total}
+                    desc={`${stats.orders.statusSummary.DELIVERED.count} completed`}
+                    color="bg-green-600"
+                    icon={<ShoppingBag />}
+                />
+                <SummaryCard
+                    title="ACTIVE USERS"
+                    value={stats.users.total}
+                    desc={`${stats.users.customers} Customers`}
+                    color="bg-slate-800 dark:bg-slate-800"
+                    icon={<Users />}
+                />
+                <SummaryCard
+                    title="INVENTORY"
+                    value={stats.inventory.medicines}
+                    desc={`${stats.inventory.categories} Categories`}
+                    color="bg-blue-500"
+                    icon={<Pill />}
+                />
             </div>
 
-            {/* Top Stat Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {topCards.map((card, idx) => (
-                    <div key={idx} className={`${card.bgColor} p-6 rounded-2xl shadow-xl transform hover:scale-105 transition-transform duration-300`}>
-                        <div className="flex justify-between items-start mb-4">
-                            <span className="text-sm font-bold text-slate-100 uppercase tracking-widest">{card.title}</span>
-                            <div className="p-2 bg-white/20 rounded-lg">
-                                {card.icon}
-                            </div>
-                        </div>
-                        <h2 className={`text-3xl font-extrabold ${card.textColor}`}>{card.value}</h2>
-                        <p className="text-xs text-slate-100 mt-2 font-medium opacity-90">{card.description}</p>
-                    </div>
-                ))}
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Order Status Breakdown */}
-                <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 rounded-full -mr-16 -mt-16"></div>
-                    <h3 className="text-xl font-black text-slate-800 mb-8 flex items-center gap-3">
-                        <div className="p-2 bg-blue-600 rounded-lg shadow-lg">
-                            <Clock className="w-6 h-6 text-white" />
-                        </div>
-                        Order Fulfillment Status
+                {/* --- Order Fulfillment Section --- */}
+                <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[30px] md:rounded-[50px] shadow-sm border border-slate-100 dark:border-slate-800">
+                    <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 mb-8 flex items-center gap-3 uppercase italic">
+                        <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+                        Order Status
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                        <StatusTile label="Placed" count={order.placed} amount={order.placedAmount} icon={<Clock className="text-blue-600" />} theme="blue" />
-                        <StatusTile label="Processing" count={order.processing} amount={order.processingAmount} icon={<Layers className="text-blue-600" />} theme="blue" />
-                        <StatusTile label="Shipped" count={order.shipped} amount={order.shippedAmount} icon={<Truck className="text-blue-600" />} theme="blue" />
-                        <StatusTile label="Delivered" count={order.delivered} amount={order.deliveredAmount} icon={<CheckCircle2 className="text-green-600" />} theme="green" />
-                        <StatusTile label="Cancelled" count={order.cancelled} amount={order.cancelledAmount} icon={<XCircle className="text-red-600" />} theme="red" />
-                        <StatusTile label="Reviews" count={review.total} amount={0} isReview icon={<Layers className="text-green-600" />} theme="green" />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
+                        {(Object.keys(statusConfigs) as OrderStatusKey[]).map((key) => {
+                            const isReview = key === 'REVIEWS';
+                            const data = isReview
+                                ? { count: stats.reviews, amount: 0 }
+                                : stats.orders.statusSummary[key as keyof typeof stats.orders.statusSummary];
+
+                            return (
+                                <StatusBox
+                                    key={key}
+                                    label={key}
+                                    count={data.count}
+                                    amount={!isReview ? data.amount : undefined}
+                                    config={statusConfigs[key]}
+                                />
+                            );
+                        })}
                     </div>
                 </div>
 
-                {/* User Role Distribution */}
-                <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                    <h3 className="text-xl font-black text-slate-800 mb-8">User Roles Distribution</h3>
-                    <div className="space-y-6">
-                        <RoleBar label="Customers" count={user.customer} total={user.total} color="bg-blue-600" />
-                        <RoleBar label="Sellers" count={user.seller} total={user.total} color="bg-green-600" />
-                        <RoleBar label="Admins" count={user.admin} total={user.total} color="bg-slate-700" />
-                    </div>
-                    <div className="mt-12 p-6 bg-blue-600 rounded-2xl shadow-inner text-white">
-                        <p className="text-sm font-bold text-center uppercase tracking-widest opacity-80">Total Managed Users</p>
-                        <h4 className="text-4xl font-black text-center mt-2">{user.total}</h4>
+                {/* --- User Roles Section --- */}
+                <div className="bg-white dark:bg-slate-900 p-6 md:p-10 rounded-[30px] md:rounded-[50px] shadow-sm border border-slate-100 dark:border-slate-800">
+                    <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 mb-8 uppercase italic">User Distribution</h3>
+                    <div className="space-y-8">
+                        <RoleProgress label="CUSTOMERS" count={stats.users.customers} total={stats.users.total} color="bg-blue-600" />
+                        <RoleProgress label="SELLERS" count={stats.users.sellers} total={stats.users.total} color="bg-green-600" />
+                        <RoleProgress label="ADMINS" count={stats.users.total - (stats.users.customers + stats.users.sellers)} total={stats.users.total} color="bg-slate-500" />
                     </div>
                 </div>
+
             </div>
         </div>
     );
 };
 
-// Helper Components with proper Types
-interface TileProps {
-    label: string;
-    count: number;
-    amount: number;
-    icon: React.ReactNode;
-    isReview?: boolean;
-    theme: 'blue' | 'green' | 'red';
-}
+// --- Sub-Components ---
 
-const StatusTile = ({ label, count, amount, icon, isReview = false, theme }: TileProps) => {
-    const themeStyles = {
-        blue: "hover:border-blue-600 hover:bg-blue-50",
-        green: "hover:border-green-600 hover:bg-green-50",
-        red: "hover:border-red-600 hover:bg-red-50"
-    };
+const SummaryCard = ({ title, value, desc, color, icon }: any) => (
+    <div className={`${color} p-6 md:p-8 rounded-[30px] md:rounded-[40px] shadow-lg text-white relative overflow-hidden transition-all hover:scale-[1.03] active:scale-95`}>
+        <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+        <div className="flex justify-between items-start mb-4 relative z-10">
+            <span className="text-[10px] font-black opacity-80 tracking-widest uppercase">{title}</span>
+            <div className="p-2.5 bg-white/20 backdrop-blur-md rounded-xl">{icon}</div>
+        </div>
+        <h2 className="text-3xl md:text-4xl font-black tracking-tighter relative z-10">{value}</h2>
+        <p className="text-[11px] opacity-90 mt-2 font-bold italic relative z-10">{desc}</p>
+    </div>
+);
 
+const StatusBox = ({ label, count, amount, config }: any) => {
+    const Icon = config.icon;
     return (
-        <div className={`p-5 rounded-2xl bg-white border-2 border-slate-100 transition-all duration-300 shadow-sm ${themeStyles[theme]}`}>
-            <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-slate-100 rounded-lg">{icon}</div>
-                <span className="text-xs font-black text-slate-500 uppercase tracking-tighter">{label}</span>
+        <div className={`${config.bgColor} p-5 md:p-7 rounded-[25px] md:rounded-[35px] transition-all hover:shadow-md border border-transparent hover:border-slate-200 dark:hover:border-slate-700`}>
+            <div className="flex items-center gap-2 mb-4">
+                <div className={`p-1.5 rounded-lg bg-white dark:bg-slate-800 shadow-sm ${config.textColor}`}>
+                    <Icon size={16} />
+                </div>
+                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-tighter text-slate-500 dark:text-slate-400">{label}</span>
             </div>
-            <div className="flex justify-between items-end">
-                <span className="text-3xl font-black text-slate-900">{count}</span>
-                {!isReview && <span className={`text-sm font-bold ${theme === 'green' ? 'text-green-600' : 'text-slate-600'}`}>৳{amount.toLocaleString()}</span>}
+            <div className="flex flex-col">
+                <span className={`text-2xl md:text-3xl font-black tracking-tighter ${config.textColor}`}>{count}</span>
+                {amount !== undefined && (
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-1">৳{amount.toLocaleString()}</span>
+                )}
             </div>
         </div>
     );
 };
 
-interface BarProps {
-    label: string;
-    count: number;
-    total: number;
-    color: string;
-}
-
-const RoleBar = ({ label, count, total, color }: BarProps) => {
+const RoleProgress = ({ label, count, total, color }: any) => {
     const percentage = total > 0 ? (count / total) * 100 : 0;
     return (
-        <div className="space-y-2">
-            <div className="flex justify-between text-sm font-black uppercase tracking-tight">
-                <span className="text-slate-500">{label}</span>
-                <span className="text-slate-900">{count}</span>
+        <div className="space-y-3">
+            <div className="flex justify-between text-[11px] font-black tracking-widest">
+                <span className="text-slate-400 dark:text-slate-500 uppercase">{label}</span>
+                <span className="text-slate-800 dark:text-slate-200">{count}</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-4 p-1 shadow-inner">
-                <div
-                    className={`${color} h-2 rounded-full transition-all duration-1000 ease-out shadow-lg`}
-                    style={{ width: `${percentage}%` }}
-                ></div>
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                <div className={`${color} h-full rounded-full transition-all duration-1000`} style={{ width: `${percentage}%` }}></div>
             </div>
         </div>
     );

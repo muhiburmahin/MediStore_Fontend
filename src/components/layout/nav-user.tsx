@@ -13,6 +13,7 @@ import {
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { ChevronsUpDown, LogOut } from "lucide-react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function NavUser({ user }: { user: any }) {
     const router = useRouter();
 

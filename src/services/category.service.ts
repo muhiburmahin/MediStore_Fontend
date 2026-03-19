@@ -3,9 +3,8 @@ import { cookies } from "next/headers";
 
 const API_URL = env.API_URL;
 
-
 export const categoryService = {
-    addCategory: async (name: string) => {
+    createCategory: async (name: string, imageUrl?: string | null) => {
         try {
             const cookieStore = await cookies();
 
@@ -15,33 +14,27 @@ export const categoryService = {
                     "Content-Type": "application/json",
                     Cookie: cookieStore.toString(),
                 },
-                body: JSON.stringify({ name }),
+                body: JSON.stringify({ name, imageUrl }),
                 cache: "no-store",
             });
 
+            const result = await res.json();
+
             if (!res.ok) {
-                const errBody = await res.json().catch(() => null);
                 return {
                     data: null,
-                    error: {
-                        message:
-                            errBody?.message ?? "Failed to create category",
-                        error: errBody ?? null,
-                    },
+                    error: { message: result?.message ?? "Failed to create category" },
                 };
             }
 
-            const created = await res.json();
-            return { data: created, error: null };
+            return { data: result.data, error: null };
         } catch (error) {
-            console.log(error);
             return {
                 data: null,
                 error: { message: "Something went wrong", error },
             };
         }
     },
-
     getAllCategories: async () => {
         try {
             const cookieStore = await cookies();
@@ -55,7 +48,6 @@ export const categoryService = {
 
             const response = await res.json();
 
-            // ব্যাকএন্ড response.data তে ক্যাটাগরি লিস্ট থাকে
             if (!res.ok || !response.success) {
                 return {
                     data: null,
@@ -72,7 +64,7 @@ export const categoryService = {
         }
     },
 
-    deleteCategory: async (id: string) => {
+    deleteCategoryById: async (id: string) => {
         try {
             const cookieStore = await cookies();
 
@@ -84,21 +76,17 @@ export const categoryService = {
                 cache: "no-store",
             });
 
-            const data = await res.json().catch(() => null);
+            const result = await res.json();
 
             if (!res.ok) {
                 return {
                     data: null,
-                    error: {
-                        message: data?.message ?? "Failed to delete category",
-                        error: data ?? null,
-                    },
+                    error: { message: result?.message ?? "Failed to delete category" },
                 };
             }
 
-            return { data, error: null };
+            return { data: result, error: null };
         } catch (error) {
-            console.log(error);
             return {
                 data: null,
                 error: { message: "Something went wrong", error },

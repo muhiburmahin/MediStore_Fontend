@@ -1,21 +1,21 @@
-// actions/review.action.ts
 "use server";
 
+import { reviewService } from "../services/review.service";
 import { Review } from "../types";
+import { revalidatePath } from "next/cache";
 
-export async function createReview(data: Partial<Review>) {
+export const createReview = async (data: Partial<Review>) => {
     try {
-        // এখানে আপনার DB Logic হবে (যেমন: prisma.review.create...)
-        console.log("Saving Review:", data);
-
-        return {
-            data: { message: "Review submitted successfully!" },
-            error: null
-        };
+        const result = await reviewService.createReview(data);
+        revalidatePath("/dashboard/my-orders");
+        return { data: result, error: null };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         return {
             data: null,
-            error: { message: error.message || "Failed to submit review" }
+            error: {
+                message: error.message || "Internal Server Error"
+            }
         };
     }
 }

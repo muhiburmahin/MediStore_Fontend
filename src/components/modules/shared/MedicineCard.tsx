@@ -17,16 +17,10 @@ interface MedicineCardProps {
 export default function MedicineCard({ medicine }: MedicineCardProps) {
     const dispatch = useDispatch<AppDispatch>();
 
-    // ইমেজ হ্যান্ডলিং
     const displayImage = medicine.images && medicine.images.length > 0
         ? medicine.images[0]
         : "/placeholder-medicine.png";
 
-    /**
-     * ডাইনামিক রেটিং ক্যালকুলেশন:
-     * ১. যদি ব্যাকএন্ড থেকে সরাসরি averageRating আসে তবে সেটি ব্যবহার করবে।
-     * ২. না থাকলে reviews অ্যারে থেকে গড় (Average) বের করবে।
-     */
     const calculateRating = () => {
         if (medicine.averageRating) return medicine.averageRating;
 
@@ -34,7 +28,7 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
             const totalRating = medicine.reviews.reduce((acc, curr) => acc + curr.rating, 0);
             return totalRating / medicine.reviews.length;
         }
-        return 0; // কোনো রিভিউ না থাকলে ০
+        return 0;
     };
 
     const finalRating = calculateRating();

@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import { CheckoutModule } from "@/components/modules/checkout/CheckoutPage";
+import CheckoutModule from '@/components/modules/checkout/CheckoutPage';
 
 export default function CheckoutPage() {
     const [mounted, setMounted] = useState(false);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => setMounted(true), []);
 
     if (!mounted) return null;

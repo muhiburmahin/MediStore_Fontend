@@ -10,11 +10,10 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import MedicineCard from "../shared/MedicineCard"; // এটি চেক করুন default export কিনা
+import MedicineCard from "../shared/MedicineCard";
 import { Medicine } from "@/types/medicine.type";
-import { fetchAllMedicines } from "@/actions/medicine.action"; // এটি চেক করুন named export কিনা
+import { fetchAllMedicines } from "@/actions/medicine.action";
 
-// Meta ডাটার জন্য নির্দিষ্ট টাইপ ইন্টারফেস
 interface MetaData {
   page: number;
   limit: number;
@@ -30,13 +29,12 @@ export default function ShopPage() {
   const [sortOrder, setSortOrder] = useState("desc");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [meta, setMeta] = useState<MetaData | null>(null); // 'any' রিমুভ করা হয়েছে
+  const [meta, setMeta] = useState<MetaData | null>(null);
   const itemsPerPage = 12;
 
   const loadMedicines = useCallback(async () => {
     setLoading(true);
     try {
-      // এপিআই কল করার সময় অবজেক্ট পাস করা হচ্ছে
       const response = await fetchAllMedicines({
         page: currentPage.toString(),
         limit: itemsPerPage.toString(),
@@ -47,7 +45,7 @@ export default function ShopPage() {
 
       if (response && response.success) {
         setMedicines(response.data);
-        setMeta(response.meta as MetaData); // টাইপ কাস্টিং
+        setMeta(response.meta as MetaData);
       }
     } catch (error) {
       console.error("Failed to load medicines:", error);

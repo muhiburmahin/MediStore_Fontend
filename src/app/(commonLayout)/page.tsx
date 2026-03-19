@@ -3,38 +3,35 @@ import CategoryList from "@/components/modules/home/CategoryList";
 import MedicineList from "@/components/modules/home/FeaturedMedicines";
 import WhyChooseUs from "@/components/modules/home/WhyChooseUs";
 import { fetchAllCategories } from "@/actions/category.action";
-import { fetchAllMedicines } from "@/actions/medicine.action"; // অ্যাকশন ইমপোর্ট করুন
+import { fetchAllMedicines } from "@/actions/medicine.action";
 
 export default async function Home() {
   const categoriesRes = await fetchAllCategories();
   const medicinesRes = await fetchAllMedicines({ limit: "8" });
 
-  // অ্যাকশন থেকে আসা প্রপার ডাটা সেট করা হচ্ছে
   const categories = categoriesRes?.data || [];
   const medicines = medicinesRes?.data || [];
 
   return (
-    <main className="min-h-screen pb-20 bg-white dark:bg-slate-950 transition-colors duration-300">
+    <main className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
 
-      {/* Hero Banner Section */}
-      <div className="animate-in fade-in zoom-in duration-700">
-        <Banner />
-      </div>
+      <section className="w-full overflow-hidden mb-0">
+        <div className="animate-in fade-in slide-in-from-top-4 duration-1000">
+          <Banner />
+        </div>
+      </section>
 
-      {/* Category List Section */}
-      <div className="py-8">
+      <section className="py-1 md:py-8">
         <CategoryList categories={categories} />
-      </div>
+      </section>
 
-      {/* Featured Medicines Section */}
-      <div className="py-8 bg-slate-50/50 dark:bg-slate-900/20">
+      <section className="py-6 md:py-10 bg-slate-50/50 dark:bg-slate-900/20 border-y border-slate-100 dark:border-slate-800">
         <MedicineList medicines={medicines} />
-      </div>
+      </section>
 
-      {/* Why Choose Us Section */}
-      <div className="py-8">
+      <section className="py-2 md:py-12">
         <WhyChooseUs />
-      </div>
+      </section>
 
     </main>
   );

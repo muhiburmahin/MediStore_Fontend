@@ -9,6 +9,7 @@ export default function Cart() {
     const [mounted, setMounted] = useState(false);
     const cart = useSelector((state: RootState) => state.cart.items);
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
 

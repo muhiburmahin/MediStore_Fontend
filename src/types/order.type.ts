@@ -1,7 +1,6 @@
 import { Medicine } from "./medicine.type";
 import { User } from "./user.type";
 
-// Enum
 export enum OrderStatus {
     PLACED = "PLACED",
     PROCESSING = "PROCESSING",
@@ -9,36 +8,32 @@ export enum OrderStatus {
     DELIVERED = "DELIVERED",
     CANCELLED = "CANCELLED",
 }
-// Interfaces
+
 export interface Order {
     id: string;
     customerId: string;
-
+    phone?: string;
     status: OrderStatus;
-    shippingAddress: string;
+    shippingAddress?: string;
+    paymentStatus?: string;
     totalAmount: number;
-
     createdAt: Date;
     updatedAt: Date;
-
     customer?: User;
     items?: OrderItem[];
 }
 
 export interface OrderItem {
     id?: string;
-
     orderId?: string;
     medicineId: string;
-
     quantity: number;
     price: number;
-
     createdAt?: Date;
-
     order?: Order;
     medicine?: Partial<Medicine>;
 }
+
 export interface CreateOrder {
     customerId: string;
     shippingAddress: string;

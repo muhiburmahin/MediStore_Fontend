@@ -2,6 +2,7 @@ import { env } from "@/env";
 import { cookies } from "next/headers";
 const API_URL = env.API_URL;
 import { UpdateUser } from "@/types";
+import { revalidateTag } from "next/cache";
 
 export const userService = {
     getSession: async function () {
@@ -47,31 +48,35 @@ export const userService = {
     getMyProfile: async () => {
         try {
             const cookieStore = await cookies();
+            const accessToken = cookieStore.get("accessToken")?.value;
 
             const res = await fetch(`${API_URL}/user/me`, {
+                method: "GET",
                 headers: {
-                    Cookie: cookieStore.toString(),
+                    "Authorization": `Bearer ${accessToken}`,
+                    "Cookie": cookieStore.toString(),
                 },
                 cache: "no-store",
                 next: { tags: ["me"] },
             });
-            const session = await res.json();
-            if (session === null) {
+
+            if (!res.ok) {
+                const errorResult = await res.json().catch(() => ({}));
                 return {
                     data: null,
-                    error: { message: "No session found", error: null },
+                    error: errorResult.message || `Error: ${res.status}`
                 };
             }
 
-            return { data: session, error: null };
+            const result = await res.json();
+            return { data: result.data, error: null };
+
         } catch (error) {
-            console.log(error);
-            return {
-                data: null,
-                error: { message: "Something went wrong", error },
-            };
+            console.error("Profile Fetch Error:", error);
+            return { data: null, error: "Network or Server Error" };
         }
     },
+
 
     getAllUsers: async () => {
         try {
@@ -84,17 +89,20 @@ export const userService = {
                 cache: "no-store",
                 next: { tags: ["users"] },
             });
-            const session = await res.json();
-            if (session === null) {
+
+            const result = await res.json();
+
+
+            if (!res.ok) {
+                console.error("Fetch Error:", result.message);
                 return {
                     data: null,
-                    error: { message: "No session found", error: null },
+                    error: { message: result.message || "Failed to fetch users", error: null },
                 };
             }
 
-            return { data: session, error: null };
+            return { data: result.data, error: null };
         } catch (error) {
-            console.log(error);
             return {
                 data: null,
                 error: { message: "Something went wrong", error },
@@ -160,31 +168,28 @@ export const userService = {
     getAdminStats: async () => {
         try {
             const cookieStore = await cookies();
-
             const res = await fetch(`${API_URL}/admin/stats`, {
                 headers: {
                     Cookie: cookieStore.toString(),
                 },
                 cache: "no-store",
             });
-            const session = await res.json();
-            if (session === null) {
+
+            const result = await res.json();
+
+            if (!res.ok || !result.success) {
                 return {
                     data: null,
-                    error: { message: "No session found", error: null },
+                    error: result.message || "Failed to fetch stats",
                 };
             }
 
-            return { data: session, error: null };
+            return { data: result.data || result.stats, error: null };
         } catch (error) {
-            console.error(error);
-            return {
-                data: null,
-                error: { message: "Something went wrong", error },
-            };
+            console.error("Admin Stats Fetch Error:", error);
+            return { data: null, error: "Something went wrong" };
         }
     },
-
     updateUser: async (id: string, data: UpdateUser) => {
         try {
             const cookieStore = await cookies();
@@ -219,6 +224,46 @@ export const userService = {
             };
         }
     },
-}
+    getStats: async (type: "admin" | "seller" | "customer") => {
+        try {
+            const cookieStore = await cookies();
+            const res = await fetch(`${API_URL}/${type}/stats`, {
+                headers: { Cookie: cookieStore.toString() },
+                cache: "no-store",
+            });
+
+            const result = await res.json();
+            return { data: result.data, error: res.ok ? null : result.message };
+        } catch (error) {
+            return { data: null, error: "Stats fetch failed" };
+        }
+    },
+
+
+    adminUpdateUser: async (id: string, data: UpdateUser) => {
+        try {
+            const cookieStore = await cookies();
+            const res = await fetch(`${API_URL}/admin/users/${id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Cookie: cookieStore.toString(),
+                },
+                body: JSON.stringify(data),
+                cache: "no-store",
+            });
+
+            const result = await res.json();
+            if (res.ok) {
+                revalidateTag("users", "");
+            }
+            return { data: result.data, error: res.ok ? null : result.message };
+        } catch (error) {
+            return { data: null, error: "Admin update failed" };
+        }
+    },
+
+};
+
 
 

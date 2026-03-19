@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { CreateMedicine, UpdateMedicine } from "@/types";
 import { env } from "@/env";
+import { revalidateTag } from "next/cache";
 const API_URL = env.API_URL;
 
 interface GetMedicineParams {
@@ -9,6 +10,7 @@ interface GetMedicineParams {
     limit?: string;
     sortOrder?: string;
     sortBy?: string;
+    sellerId?: string;
 }
 
 export const medicineService = {
@@ -25,26 +27,19 @@ export const medicineService = {
                 cache: "no-store",
             });
 
+            const result = await res.json();
+
             if (!res.ok) {
-                const errBody = await res.json().catch(() => null);
                 return {
                     data: null,
-                    error: {
-                        message:
-                            errBody?.message ?? "Failed to create medicine",
-                        error: errBody ?? null,
-                    },
+                    error: { message: result?.message ?? "Failed to create medicine", error: result },
                 };
             }
+            revalidateTag("medicines", "profile");
 
-            const updated = await res.json();
-            return { data: updated, error: null };
+            return { data: result, error: null };
         } catch (error) {
-            console.log(error);
-            return {
-                data: null,
-                error: { message: "Something went wrong", error },
-            };
+            return { data: null, error: { message: "Something went wrong", error } };
         }
     },
     getAllMedicines: async (params?: GetMedicineParams) => {
@@ -55,7 +50,7 @@ export const medicineService = {
             if (params) {
                 Object.entries(params).forEach(([key, value]) => {
                     if (value !== undefined && value !== null && value !== "") {
-                        url.searchParams.set(key, value);
+                        url.searchParams.set(key, value as string);
                     }
                 });
             }
@@ -64,53 +59,50 @@ export const medicineService = {
                 headers: {
                     Cookie: cookieStore.toString(),
                 },
-            };
-
-            config.next = {
-                ...config.next,
-                tags: ["medicines"],
+                next: {
+                    tags: ["medicines"],
+                }
             };
 
             const res = await fetch(url.toString(), config);
-            const session = await res.json();
-            if (session === null) {
+            const responseData = await res.json();
+
+            if (!res.ok) {
                 return {
                     data: null,
-                    error: { message: "No medicine found", error: null },
+                    error: { message: responseData?.message ?? "No medicine found", error: null },
                 };
             }
 
-            return { data: session || [], error: null };
+            return { data: responseData.data || [], meta: responseData.meta, error: null };
         } catch (error) {
-            console.log(error);
-            return {
-                data: null,
-                error: { message: "Something went wrong", error },
-            };
+            console.error("Fetch Error:", error);
+            return { data: null, error: { message: "Something went wrong", error } };
         }
     },
 
     getMedicineById: async (id: string) => {
         try {
-            const cookieStore = await cookies();
 
+            const cookieStore = await cookies();
             const res = await fetch(`${API_URL}/medicines/${id}`, {
                 headers: {
                     Cookie: cookieStore.toString(),
                 },
                 cache: "no-store",
             });
-            const session = await res.json();
-            if (session === null) {
+
+            const result = await res.json();
+
+            if (!res.ok || !result.data) {
                 return {
                     data: null,
-                    error: { message: "No medicine found", error: null },
+                    error: { message: result.message || "No medicine found", error: null },
                 };
             }
 
-            return { data: session, error: null };
+            return { data: result.data, error: null };
         } catch (error) {
-            console.log(error);
             return {
                 data: null,
                 error: { message: "Something went wrong", error },

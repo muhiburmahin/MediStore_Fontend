@@ -27,13 +27,13 @@ export function LoginForm() {
       email: "",
       password: "",
     },
-    validatorAdapter: zodValidator(),
+    // validatorAdapter: zodValidator(),
     onSubmit: async ({ value }) => {
       setLoading(true);
       const toastId = toast.loading("Logging in to MediStore...");
 
       try {
-        const { data, error } = await authClient.signIn.email({
+        const { error } = await authClient.signIn.email({
           email: value.email,
           password: value.password,
           callbackURL: "/",
@@ -161,7 +161,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={async () => {
-              await authClient.signIn.social({ provider: "google", callbackURL: "http://localhost:3000" });
+              await authClient.signIn.social({ provider: "google", callbackURL: "https://medistore-iota.vercel.app" });
             }}
             className="w-full bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 flex items-center justify-center gap-3 p-3.5 rounded-xl hover:shadow-lg transition-all active:scale-95"
           >

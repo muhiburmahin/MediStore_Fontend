@@ -1,8 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Medicine } from "../../types";
 import { loadCartFromStorage } from "../../utils/cartStorage";
+import { ReactNode } from 'react';
 
 export interface CartItem {
+    selectedSize: ReactNode;
     medicine: Medicine;
     quantity: number;
 }
@@ -35,6 +37,7 @@ const cartSlice = createSlice({
                 state.items.push({
                     medicine,
                     quantity,
+                    selectedSize: undefined
                 });
             }
         },

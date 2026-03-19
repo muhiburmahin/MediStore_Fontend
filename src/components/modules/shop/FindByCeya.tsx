@@ -30,8 +30,6 @@ export default function FindByCeta() {
     const [currentPage, setCurrentPage] = useState(1);
     const [meta, setMeta] = useState<MetaData | null>(null);
     const itemsPerPage = 12;
-
-    // ১. ব্যাকএন্ড থেকে ক্যাটাগরি লিস্ট নিয়ে আসা
     useEffect(() => {
         const getCategories = async () => {
             setCatLoading(true);
@@ -49,14 +47,12 @@ export default function FindByCeta() {
         getCategories();
     }, []);
 
-    // ২. ব্যাকএন্ড থেকে মেডিসিন ফিল্টার করে নিয়ে আসা
     const loadMedicines = useCallback(async () => {
         setLoading(true);
         try {
             const response = await fetchAllMedicines({
                 page: currentPage.toString(),
                 limit: itemsPerPage.toString(),
-                // আপনার এপিআই যদি সার্চ প্যারামিটারে ক্যাটাগরি সাপোর্ট করে
                 search: selectedCategory === "All" ? "" : selectedCategory,
             });
 
@@ -110,8 +106,8 @@ export default function FindByCeta() {
                             <button
                                 onClick={() => { setSelectedCategory("All"); setCurrentPage(1); }}
                                 className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl text-sm transition-all cursor-pointer ${selectedCategory === "All"
-                                        ? "bg-blue-600 text-white font-bold shadow-lg shadow-blue-200 dark:shadow-none"
-                                        : "text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600"
+                                    ? "bg-blue-600 text-white font-bold shadow-lg shadow-blue-200 dark:shadow-none"
+                                    : "text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600"
                                     }`}
                             >
                                 <span className="truncate">All Medicines</span>
@@ -127,8 +123,8 @@ export default function FindByCeta() {
                                         key={cat.id || cat._id}
                                         onClick={() => { setSelectedCategory(cat.name); setCurrentPage(1); }}
                                         className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl text-sm transition-all cursor-pointer ${selectedCategory === cat.name
-                                                ? "bg-blue-600 text-white font-bold shadow-lg shadow-blue-200 dark:shadow-none"
-                                                : "text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600"
+                                            ? "bg-blue-600 text-white font-bold shadow-lg shadow-blue-200 dark:shadow-none"
+                                            : "text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600"
                                             }`}
                                     >
                                         <span className="truncate">{cat.name}</span>
@@ -140,7 +136,6 @@ export default function FindByCeta() {
                     </div>
                 </aside>
 
-                {/* Main Content - Medicines Grid */}
                 <main className="flex-1 w-full">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-32">
