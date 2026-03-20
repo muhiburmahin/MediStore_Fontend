@@ -6,6 +6,7 @@ import { CreateMedicine, UpdateMedicine } from "@/types";
 
 interface GetMedicineParams {
     search?: string;
+    category?: string;
     page?: string;
     limit?: string;
     sortOrder?: string;

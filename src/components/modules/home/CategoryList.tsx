@@ -32,7 +32,7 @@ export default function CategoryList({ categories }: CategoryListProps) {
 
                     <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">
                         <span className="bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
-                            Browse by Category
+                            All Category
                         </span>
                     </h2>
                     <div className="h-1.5 w-32 bg-gradient-to-r from-blue-600 to-green-500 rounded-full" />

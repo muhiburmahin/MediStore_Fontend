@@ -1,51 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 interface OrderStatusData {
     name: string;
     value: number;
     fill: string;
 }
-
-const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    outerRadius,
-    value,
-    percent,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: any) => {
-    const radius = outerRadius + 35;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    const sin = Math.sin(-RADIAN * midAngle);
-    const cos = Math.cos(-RADIAN * midAngle);
-    const sx = cx + (outerRadius + 10) * cos;
-    const sy = cy + (outerRadius + 10) * sin;
-    const textAnchor = cos >= 0 ? "start" : "end";
-
-    return (
-        <g>
-            <path d={`M${sx},${sy}L${x},${y}`} stroke="#999" fill="none" />
-            <circle cx={x} cy={y} r={2} fill="#999" stroke="none" />
-            <text
-                x={x + (cos >= 0 ? 1 : -1) * 12}
-                y={y}
-                textAnchor={textAnchor}
-                fill="#333"
-                dominantBaseline="central"
-                className="text-sm"
-            >
-                {`${value} (${(percent * 100).toFixed(1)}%)`}
-            </text>
-        </g>
-    );
-};
 
 export default function OrderStatusPie({
     orderStatusData,
@@ -58,14 +22,19 @@ export default function OrderStatusPie({
     );
 
     return (
-        <Card className="shadow-md hover:shadow-2xl">
-            <CardHeader>
-                <CardTitle>Overall Totals</CardTitle>
+        <Card className="shadow-md hover:shadow-xl transition-all duration-300 border-none bg-white dark:bg-slate-900">
+            <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-bold text-slate-700 dark:text-slate-200">
+                    Order Success Rate
+                </CardTitle>
             </CardHeader>
-            <CardContent className="h-96 relative">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                    <p className="text-sm text-muted-foreground">Total Orders</p>
-                    <p className="text-3xl font-bold">
+            <CardContent className="h-[350px] w-full relative p-0">
+                {/* চার্টের মাঝখানে টোটাল নাম্বার */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10 pointer-events-none">
+                    <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest leading-none">
+                        Total Orders
+                    </p>
+                    <p className="text-3xl font-black text-slate-800 dark:text-white mt-1">
                         {totalValue.toLocaleString()}
                     </p>
                 </div>
@@ -73,14 +42,11 @@ export default function OrderStatusPie({
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Tooltip
-                            cursor={{
-                                stroke: "hsl(var(--primary))",
-                                strokeWidth: 1,
-                            }}
                             contentStyle={{
                                 background: "hsl(var(--background))",
                                 borderColor: "hsl(var(--border))",
-                                borderRadius: "var(--radius)",
+                                borderRadius: "12px",
+                                fontSize: "12px"
                             }}
                         />
                         <Pie
@@ -89,33 +55,38 @@ export default function OrderStatusPie({
                             nameKey="name"
                             cx="50%"
                             cy="50%"
-                            innerRadius={80}
-                            outerRadius={110}
-                            paddingAngle={3}
-                            labelLine={false}
-                            label={renderCustomizedLabel}
+                            innerRadius="65%"  // ডোনাট স্টাইল
+                            outerRadius="90%"
+                            paddingAngle={5}   // স্লাইসগুলোর মধ্যে গ্যাপ
+                            stroke="none"
                         >
                             {orderStatusData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                                <Cell
+                                    key={`cell-${index}`}
+                                    fill={entry.fill}
+                                    className="hover:opacity-80 transition-opacity outline-none"
+                                />
                             ))}
                         </Pie>
+
+                        <Legend
+                            verticalAlign="bottom"
+                            align="center"
+                            iconType="circle"
+                            layout="horizontal"
+                            formatter={(value, entry: any) => {
+                                const { value: val } = entry.payload;
+                                const percent = totalValue > 0 ? ((val / totalValue) * 100).toFixed(1) : 0;
+                                return (
+                                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 ml-1">
+                                        {value} ({percent}%)
+                                    </span>
+                                );
+                            }}
+                        />
                     </PieChart>
                 </ResponsiveContainer>
             </CardContent>
-
-            <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 p-4">
-                {orderStatusData.map((entry) => (
-                    <div key={entry.name} className="flex items-center gap-2">
-                        <span
-                            className="h-3 w-3 rounded-full"
-                            style={{ backgroundColor: entry.fill }}
-                        />
-                        <span className="text-sm text-muted-foreground">
-                            {entry.name}
-                        </span>
-                    </div>
-                ))}
-            </div>
         </Card>
     );
 }

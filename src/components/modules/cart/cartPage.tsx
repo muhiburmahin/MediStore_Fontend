@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../../../store";
-import { Minus, Plus, Trash2, ShoppingBag, ShieldCheck, ArrowRight } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ShieldCheck } from "lucide-react";
 import { addToCart, removeOneFromCart, removeFromCart } from "@/store/slice/cartSlice";
 import Image from "next/image";
 import { Button } from "../../ui/button";
@@ -45,64 +45,80 @@ export default function CartPage() {
             </h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-
+                {/* Left Side: Cart Items */}
                 <div className="lg:col-span-2 space-y-4">
-                    {cart.map((item) => (
-                        <div key={item.medicine.id} className="flex flex-row items-center gap-3 md:gap-4 p-3 md:p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
+                    {cart.map((item) => {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const itemImage = (item.medicine as any).images?.[0] || item.medicine.imageUrl;
 
-                            <div className="relative w-20 h-20 md:w-24 md:h-24 bg-slate-50 dark:bg-slate-800 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-slate-700">
-                                <Image src={item.medicine.imageUrl} alt={item.medicine.name} fill className="object-cover" />
-                            </div>
+                        return (
+                            <div key={item.medicine.id} className="flex flex-row items-center gap-3 md:gap-4 p-3 md:p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
 
-                            <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-sm md:text-lg text-slate-800 dark:text-slate-100 truncate leading-tight">
-                                    {item.medicine.name}
-                                </h3>
-                                <p className="text-[10px] md:text-xs text-slate-500 dark:text-slate-400">
-                                    {item.medicine.manufacturer}
-                                </p>
-                                <p className="text-blue-600 dark:text-blue-400 font-bold mt-1 text-sm md:text-base">৳{item.medicine.price}</p>
-                            </div>
-
-                            <div className="flex flex-col md:flex-row items-center gap-2 md:gap-16">
-
-                                <div className="flex items-center gap-2 md:gap-3 bg-slate-50 dark:bg-slate-800 p-1.5 md:p-2 rounded-full border border-slate-200 dark:border-slate-700">
-                                    <button
-                                        onClick={() => dispatch(removeOneFromCart(item.medicine.id))}
-                                        className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full border-2 border-transparent bg-origin-border bg-gradient-to-r from-blue-600 to-green-600 p-[1.5px]"
-                                    >
-                                        <div className="w-full h-full bg-white dark:bg-slate-900 rounded-full flex items-center justify-center text-blue-600">
-                                            <Minus size={12} className="md:w-3.5 md:h-3.5" />
+                                {/* Medicine Image Container */}
+                                <div className="relative w-20 h-20 md:w-24 md:h-24 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-slate-700">
+                                    {itemImage ? (
+                                        <Image
+                                            src={itemImage}
+                                            alt={item.medicine.name}
+                                            fill
+                                            className="object-contain p-2"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800">
+                                            <ShoppingBag size={24} className="text-slate-300" />
                                         </div>
-                                    </button>
-
-                                    <span className="text-sm md:text-lg font-black text-slate-700 dark:text-slate-200 min-w-[18px] text-center">
-                                        {item.quantity}
-                                    </span>
-
-                                    <button
-                                        onClick={() => dispatch(addToCart({ medicine: item.medicine }))}
-                                        className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full border-2 border-transparent bg-origin-border bg-gradient-to-r from-blue-600 to-green-600 p-[1.5px]"
-                                    >
-                                        <div className="w-full h-full bg-white dark:bg-slate-900 rounded-full flex items-center justify-center text-green-600">
-                                            <Plus size={12} className="md:w-3.5 md:h-3.5" />
-                                        </div>
-                                    </button>
+                                    )}
                                 </div>
 
-                                <div className="text-right flex flex-row md:flex-col items-center md:items-end gap-2 md:gap-1">
-                                    <p className="font-black text-slate-900 dark:text-slate-100 text-sm md:text-lg">৳{item.quantity * item.medicine.price}</p>
-                                    <button onClick={() => dispatch(removeFromCart(item.medicine.id))} className="text-red-400 hover:text-red-600 p-1 transition-colors">
-                                        <Trash2 size={16} className="md:w-[18px] md:h-[18px]" />
-                                    </button>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-bold text-sm md:text-lg text-slate-800 dark:text-slate-100 truncate leading-tight">
+                                        {item.medicine.name}
+                                    </h3>
+                                    <p className="text-[10px] md:text-xs text-slate-500 dark:text-slate-400">
+                                        {item.medicine.manufacturer}
+                                    </p>
+                                    <p className="text-blue-600 dark:text-blue-400 font-bold mt-1 text-sm md:text-base">৳{item.medicine.price}</p>
+                                </div>
+
+                                <div className="flex flex-col md:flex-row items-center gap-2 md:gap-16">
+                                    {/* Quantity Controls */}
+                                    <div className="flex items-center gap-2 md:gap-3 bg-slate-50 dark:bg-slate-800 p-1.5 md:p-2 rounded-full border border-slate-200 dark:border-slate-700">
+                                        <button
+                                            onClick={() => dispatch(removeOneFromCart(item.medicine.id))}
+                                            className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full border-2 border-transparent bg-origin-border bg-gradient-to-r from-blue-600 to-green-600 p-[1.5px]"
+                                        >
+                                            <div className="w-full h-full bg-white dark:bg-slate-900 rounded-full flex items-center justify-center text-blue-600">
+                                                <Minus size={12} className="md:w-3.5 md:h-3.5" />
+                                            </div>
+                                        </button>
+
+                                        <span className="text-sm md:text-lg font-black text-slate-700 dark:text-slate-200 min-w-[18px] text-center">
+                                            {item.quantity}
+                                        </span>
+
+                                        <button
+                                            onClick={() => dispatch(addToCart({ medicine: item.medicine }))}
+                                            className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full border-2 border-transparent bg-origin-border bg-gradient-to-r from-blue-600 to-green-600 p-[1.5px]"
+                                        >
+                                            <div className="w-full h-full bg-white dark:bg-slate-900 rounded-full flex items-center justify-center text-green-600">
+                                                <Plus size={12} className="md:w-3.5 md:h-3.5" />
+                                            </div>
+                                        </button>
+                                    </div>
+
+                                    <div className="text-right flex flex-row md:flex-col items-center md:items-end gap-2 md:gap-1">
+                                        <p className="font-black text-slate-900 dark:text-slate-100 text-sm md:text-lg">৳{item.quantity * item.medicine.price}</p>
+                                        <button onClick={() => dispatch(removeFromCart(item.medicine.id))} className="text-red-400 hover:text-red-600 p-1 transition-colors">
+                                            <Trash2 size={16} className="md:w-[18px] md:h-[18px]" />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
-                {/* Right Side / Bottom: Order Summary */}
+                {/* Right Side: Order Summary */}
                 <div className="lg:col-span-1">
                     <div className="bg-white dark:bg-slate-900 p-8 rounded-[1.5rem] border border-slate-100 dark:border-slate-800 shadow-xl lg:sticky lg:top-24">
                         <h2 className="text-xl font-bold mb-6 text-slate-800 dark:text-slate-100">Order Summary</h2>
@@ -128,7 +144,7 @@ export default function CartPage() {
 
                             <Link href="/checkout" className="w-full inline-block">
                                 <Button className="w-full h-14 text-lg font-bold bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-[1rem] shadow-lg hover:opacity-90 transition-opacity">
-                                    Checkout
+                                    Go to Checkout
                                 </Button>
                             </Link>
 

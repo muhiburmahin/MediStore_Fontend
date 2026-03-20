@@ -18,50 +18,38 @@ export const createCategoryAction = async (formData: FormData) => {
     try {
         const name = formData.get("name") as string;
         const file = formData.get("image") as File;
+        const existingImageUrl = formData.get("imageUrl") as string;
 
-        if (!name) {
-            return { success: false, message: "Category name is required" };
-        }
+        if (!name) return { success: false, message: "Category name is required" };
 
-        let imageUrl = null;
-        if (file && file.size > 0) {
+        let finalImageUrl = existingImageUrl || null;
+
+        if (file && file.size > 0 && !finalImageUrl) {
             const arrayBuffer = await file.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const uploadResponse: any = await new Promise((resolve, reject) => {
                 cloudinary.uploader.upload_stream(
-                    {
-                        folder: "medistore/categories",
-                        resource_type: "auto"
-                    },
+                    { folder: "medistore/categories", resource_type: "auto" },
                     (error, result) => {
                         if (error) reject(error);
                         else resolve(result);
                     }
                 ).end(buffer);
             });
-
-            imageUrl = uploadResponse.secure_url;
+            finalImageUrl = uploadResponse.secure_url;
         }
 
-        const result = await categoryService.createCategory(name, imageUrl);
+        const result = await categoryService.createCategory(name, finalImageUrl);
 
-        if (result.error) {
-            return { success: false, message: result.error.message };
-        }
+        if (result.error) return { success: false, message: result.error.message };
 
         revalidatePath("/admin-dashboard/categories");
         revalidatePath("/seller-dashboard/categories");
-
-        return {
-            success: true,
-            message: "Category created successfully",
-            data: result.data,
-        };
+        return { success: true, message: "Category created!", data: result.data };
     } catch (error) {
-        console.error("Upload Error:", error);
-        return { success: false, message: "Something went wrong while creating category" };
+        return { success: false, message: "Server error" };
     }
 };
 

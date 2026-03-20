@@ -53,7 +53,7 @@ export default function FindByCeta() {
             const response = await fetchAllMedicines({
                 page: currentPage.toString(),
                 limit: itemsPerPage.toString(),
-                search: selectedCategory === "All" ? "" : selectedCategory,
+                category: selectedCategory === "All" ? undefined : selectedCategory,
             });
 
             if (response?.data) {
@@ -63,7 +63,6 @@ export default function FindByCeta() {
                 setMedicines([]);
             }
         } catch (error) {
-            console.error("Medicines load failed:", error);
             setMedicines([]);
         } finally {
             setLoading(false);

@@ -25,7 +25,7 @@ export default async function Home() {
         <CategoryList categories={categories} />
       </section>
 
-      <section className="py-6 md:py-10 bg-slate-50/50 dark:bg-slate-900/20 border-y border-slate-100 dark:border-slate-800">
+      <section className="py-1 md:py-10 bg-slate-50/50 dark:bg-slate-900/20 border-y border-slate-100 dark:border-slate-800">
         <MedicineList medicines={medicines} />
       </section>
 

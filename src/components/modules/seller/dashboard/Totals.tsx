@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useMemo } from "react";
-import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from "recharts";
+import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 
 interface TotalsData {
@@ -10,42 +10,6 @@ interface TotalsData {
     fill: string;
 }
 
-const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    outerRadius,
-    value,
-    percent,
-}: any) => {
-    const radius = outerRadius + 35;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    const sin = Math.sin(-RADIAN * midAngle);
-    const cos = Math.cos(-RADIAN * midAngle);
-    const sx = cx + (outerRadius + 10) * cos;
-    const sy = cy + (outerRadius + 10) * sin;
-    const textAnchor = cos >= 0 ? "start" : "end";
-
-    return (
-        <g>
-            <path d={`M${sx},${sy}L${x},${y}`} stroke="#999" fill="none" />
-            <circle cx={x} cy={y} r={2} fill="#999" stroke="none" />
-            <text
-                x={x + (cos >= 0 ? 1 : -1) * 12}
-                y={y}
-                textAnchor={textAnchor}
-                fill="#333"
-                dominantBaseline="central"
-                className="text-sm"
-            >
-                {`${value} (${(percent * 100).toFixed(1)}%)`}
-            </text>
-        </g>
-    );
-};
-
 export default function TotalsPie({ totalsData }: { totalsData: TotalsData[] }) {
     const totalValue = useMemo(
         () => totalsData.reduce((acc, curr) => acc + curr.value, 0),
@@ -53,14 +17,18 @@ export default function TotalsPie({ totalsData }: { totalsData: TotalsData[] }) 
     );
 
     return (
-        <Card className="shadow-md hover:shadow-2xl">
-            <CardHeader>
-                <CardTitle>Overall Totals</CardTitle>
+        <Card className="shadow-md hover:shadow-xl transition-all duration-300 border-none bg-white dark:bg-slate-900">
+            <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-bold text-slate-700 dark:text-slate-200">
+                    Overall Totals
+                </CardTitle>
             </CardHeader>
-            <CardContent className="h-96 relative">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                    <p className="text-sm text-muted-foreground">Total Items</p>
-                    <p className="text-3xl font-bold">
+            <CardContent className="h-[350px] w-full relative">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center z-10 pointer-events-none">
+                    <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">
+                        Total Items
+                    </p>
+                    <p className="text-3xl font-black text-slate-800 dark:text-white">
                         {totalValue.toLocaleString()}
                     </p>
                 </div>
@@ -68,11 +36,11 @@ export default function TotalsPie({ totalsData }: { totalsData: TotalsData[] }) 
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Tooltip
-                            cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1 }}
                             contentStyle={{
                                 background: "hsl(var(--background))",
                                 borderColor: "hsl(var(--border))",
-                                borderRadius: "var(--radius)",
+                                borderRadius: "12px",
+                                fontSize: "12px"
                             }}
                         />
                         <Pie
@@ -81,33 +49,38 @@ export default function TotalsPie({ totalsData }: { totalsData: TotalsData[] }) 
                             nameKey="name"
                             cx="50%"
                             cy="50%"
-                            innerRadius={80}
-                            outerRadius={110}
-                            paddingAngle={3}
-                            labelLine={false}
-                            label={renderCustomizedLabel}
+                            innerRadius="65%"
+                            outerRadius="90%"
+                            paddingAngle={5}
+                            stroke="none"
                         >
                             {totalsData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                                <Cell
+                                    key={`cell-${index}`}
+                                    fill={entry.fill}
+                                    className="hover:opacity-80 transition-opacity outline-none"
+                                />
                             ))}
                         </Pie>
+
+                        <Legend
+                            verticalAlign="bottom"
+                            align="center"
+                            iconType="circle"
+                            layout="horizontal"
+                            formatter={(value, entry: any) => {
+                                const { value: val } = entry.payload;
+                                const percent = ((val / totalValue) * 100).toFixed(1);
+                                return (
+                                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 ml-1">
+                                        {value} ({percent}%)
+                                    </span>
+                                );
+                            }}
+                        />
                     </PieChart>
                 </ResponsiveContainer>
             </CardContent>
-
-            <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 p-4">
-                {totalsData.map((entry) => (
-                    <div key={entry.name} className="flex items-center gap-2">
-                        <span
-                            className="h-3 w-3 rounded-full"
-                            style={{ backgroundColor: entry.fill }}
-                        />
-                        <span className="text-sm text-muted-foreground">
-                            {entry.name}
-                        </span>
-                    </div>
-                ))}
-            </div>
         </Card>
     );
 }
