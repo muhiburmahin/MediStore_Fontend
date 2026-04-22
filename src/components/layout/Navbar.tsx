@@ -48,6 +48,7 @@ const Navbar = () => {
   const cartCount = cartItems.length;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -234,6 +235,7 @@ const Navbar = () => {
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const BottomTab = ({ label, icon, url, active, activeColor }: { label: string, icon: any, url: string, active: boolean, activeColor: string }) => (
   <Link href={url} className="flex flex-col items-center justify-center flex-1 h-full relative group">
     <div className={`transition-all duration-300 transform ${active ? `${activeColor} -translate-y-1.5 scale-110` : 'text-slate-400 group-hover:text-slate-600'}`}>
