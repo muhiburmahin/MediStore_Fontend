@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💊 MediStore - Online Pharmacy Marketplace
 
-## Getting Started
+**MediStore** is a sophisticated full-stack e-commerce platform dedicated to seamless medicine discovery, purchasing, and inventory management. It provides a clean, user-centric interface for customers to find healthcare products while empowering sellers with robust tools to manage their catalogs.
 
-First, run the development server:
+## 🚀 Live Demo
+Explore the application here: **[MediStore Live](https://medistore-iota.vercel.app)**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 👥 Multi-Role Architecture
+*   **Customer Role**: Enables users to browse medicines, add items to a cart, place orders, and provide product reviews.
+*   **Seller Role**: Allows vendors to list new medicines, manage stock levels, and track incoming orders.
+*   **Admin Role**: Provides high-level oversight for managing users, categories, and maintaining platform integrity.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 📦 Medicine & Inventory Management
+*   **Dynamic Categorization**: Organizes medicines into types like Tablets, Syrups, or Healthcare for easy navigation.
+*   **Real-time Stock Tracking**: Ensures accurate inventory levels and displays manufacturer details for transparency.
+*   **User Feedback Loop**: Features a review system where customers can rate medicines, fostering community trust.
 
-## Learn More
+### 🛒 Ordering & Workflow
+*   **Comprehensive Order Tracking**: Tracks orders through multiple stages: `PLACED`, `PROCESSING`, `SHIPPED`, and `DELIVERED`.
+*   **Relational Data Integrity**: Ensures every transaction is linked accurately to the customer and specific medicine via Prisma relations.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Frontend
+*   **Framework**: Next.js (App Router)
+*   **Styling**: Tailwind CSS & shadcn/ui
+*   **Language**: TypeScript
+*   **State Management**: React Query / Context API
 
-## Deploy on Vercel
+### Backend
+*   **Runtime**: Node.js
+*   **Framework**: Express.js
+*   **ORM**: Prisma
+*   **Database**: MySQL (optimized for relational performance)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🏗️ Database Design (Prisma)
+The backend leverages a highly optimized relational schema:
+*   **Optimized Performance**: Database indexing is implemented on `name`, `categoryId`, and `sellerId` to ensure rapid search results.
+*   **Data Validation**: Uses Enums for `Role`, `orderStatus`, and `UserStatus` to maintain strict data standards.
+*   **Session Management**: Includes dedicated models for user sessions, tracking IP addresses and user agents for enhanced security.
+*   **Cascading Actions**: Implements `onDelete: Cascade` to ensure data consistency across related tables.
+
+---
+
+## 🚀 Local Installation
+
+1.  **Clone the Repository**:
+    ```bash
+    git clone [https://github.com/muhiburmahin/medistore-frontend.git](https://github.com/muhiburmahin/medistore-frontend.git)
+    ```
+2.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
+3.  **Configure Environment**:
+    Create a `.env` file and add your `DATABASE_URL` and other necessary API keys.
+4.  **Sync Database**:
+    ```bash
+    npx prisma generate
+    ```
+5.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
+
+---
+
+**Developed by [Md Muhibur Rahman Mahin](https://github.com/muhiburmahin)**
+*Full-Stack Web Developer
