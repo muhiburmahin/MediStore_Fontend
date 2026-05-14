@@ -29,7 +29,7 @@ export const CustomerStats = ({ stats }: { stats: UserStats | null }) => {
         },
         {
             title: "Total Spent",
-            value: `৳${stats?.totalSpent || 0}`,
+            value: `৳${Number(stats?.totalSpent ?? 0).toLocaleString()}`,
             icon: <Wallet size={24} />,
             color: "border-purple-500/10 bg-purple-50/50 dark:bg-purple-500/5 text-purple-600 dark:text-purple-400"
         },

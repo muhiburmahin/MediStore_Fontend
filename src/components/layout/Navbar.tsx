@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "./modeTaggle";
+import { NavbarNotifications } from "./NavbarNotifications";
 import { toast } from "sonner";
 
 interface MenuItem {
@@ -58,6 +59,16 @@ const Navbar = () => {
   const closeSheet = () => setIsSheetOpen(false);
 
   const handleLogout = async () => {
+    try {
+      await fetch("/api/v1/auth/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+    } catch {
+      /* ignore network errors; still attempt client sign-out */
+    }
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
@@ -86,16 +97,16 @@ const Navbar = () => {
 
   return (
     <>
-      <section className="sticky top-0 z-50 w-full border-b bg-white/95 dark:bg-slate-950/95 backdrop-blur shadow-sm">
-        <div className="container mx-auto px-4 md:px-10 h-16 md:h-20 flex items-center justify-between gap-4">
+      <section className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 pt-[max(0px,env(safe-area-inset-top))] backdrop-blur shadow-sm dark:border-slate-800/80 dark:bg-slate-950/95">
+        <div className="container mx-auto flex h-16 min-h-16 max-w-[100vw] items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4 md:h-20 md:min-h-20 md:px-10">
 
           {/* Logo Section */}
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2 shrink-0 group">
-              <div className="size-10 flex items-center justify-center transition-transform group-hover:scale-105">
+          <div className="flex min-w-0 flex-1 items-center gap-3 lg:max-w-none lg:flex-none lg:gap-8">
+            <Link href="/" className="flex min-w-0 items-center gap-1.5 sm:gap-2 shrink-0 group">
+              <div className="size-9 shrink-0 sm:size-10 flex items-center justify-center transition-transform group-hover:scale-105">
                 <Image src="/logo.png" alt="MediStore" width={40} height={40} className="object-contain" />
               </div>
-              <span className="text-xl md:text-2xl font-black tracking-tighter">
+              <span className="truncate text-lg font-black tracking-tighter sm:text-xl md:text-2xl">
                 <span className="text-blue-600">Medi</span>
                 <span className="text-green-600 italic">Store</span>
               </span>
@@ -110,11 +121,13 @@ const Navbar = () => {
             </nav>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2 md:gap-3">
             <ModeToggle />
 
+            <NavbarNotifications signedIn={!!user && !isPending} />
+
             {/* Cart Button */}
-            <Link href="/cart" className="relative p-2 flex items-center justify-center">
+            <Link href="/cart" className="relative flex min-h-10 min-w-10 items-center justify-center rounded-full p-2 touch-manipulation">
               <ShoppingCart className="w-6 h-6 text-slate-700 dark:text-slate-200 hover:text-blue-600 transition-colors" />
               {mounted && cartCount > 0 && (
                 <span className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-bold border-2 border-white dark:border-slate-950">
@@ -143,12 +156,12 @@ const Navbar = () => {
               ) : (
                 <>
                   <Link href="/login">
-                    <Button className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white p-4 rounded-xl font-black text-lg shadow-xl active:scale-95 disabled:grayscale flex justify-center items-center transition-all">
+                    <Button className="w-full min-h-11 bg-gradient-to-r from-green-600 to-blue-600 text-white px-4 py-2.5 text-sm font-black shadow-xl active:scale-95 sm:text-base md:p-4 md:text-lg flex justify-center items-center transition-all">
                       Login
                     </Button>
                   </Link>
                   <Link href="/register">
-                    <Button variant="outline" className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white p-4 rounded-xl font-black text-lg shadow-xl active:scale-95 disabled:grayscale flex justify-center items-center transition-all">
+                    <Button variant="outline" className="w-full min-h-11 bg-gradient-to-r from-green-600 to-blue-600 text-white px-4 py-2.5 text-sm font-black shadow-xl active:scale-95 sm:text-base md:p-4 md:text-lg flex justify-center items-center transition-all">
                       Register
                     </Button>
                   </Link>
@@ -224,7 +237,7 @@ const Navbar = () => {
       </section>
 
       {/* --- Colorfull Mobile Bottom Navigation --- */}
-      <div className="lg:hidden fixed bottom-0 left-0 z-50 w-full h-16 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 flex items-center justify-around px-2 shadow-[0_-8px_20px_rgba(0,0,0,0.08)] pb-1">
+      <div className="lg:hidden fixed bottom-0 left-0 z-50 flex h-[calc(4rem+env(safe-area-inset-bottom,0px))] w-full items-center justify-around border-t border-slate-200 bg-white/95 px-1 pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-8px_20px_rgba(0,0,0,0.08)] backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/95">
         <BottomTab label="Home" icon={<Home size={22} />} url="/" active={pathname === "/"} activeColor="text-blue-600" />
         <BottomTab label="Shop" icon={<ShoppingBag size={22} />} url="/shop" active={pathname === "/shop"} activeColor="text-green-600" />
         <BottomTab label="Dashboard" icon={<LayoutDashboard size={22} />} url="/dashboard" active={pathname.includes("/dashboard")} activeColor="text-blue-600" />

@@ -7,6 +7,7 @@ import { CreateMedicine, UpdateMedicine } from "@/types";
 interface GetMedicineParams {
     search?: string;
     category?: string;
+    categoryId?: string;
     page?: string;
     limit?: string;
     sortOrder?: string;
@@ -19,18 +20,33 @@ export const fetchAllMedicines = async (params?: GetMedicineParams) => {
     try {
         const result = await medicineService.getAllMedicines(params);
 
-        const medicines = result?.data?.data || result?.data || [];
-        const meta = result?.data?.meta || null;
+        if (result.error || result.data === null) {
+            return {
+                success: false,
+                data: [],
+                meta: null,
+                error: result.error || null,
+            };
+        }
+
+        const medicines = Array.isArray(result.data) ? result.data : [];
+        const rawMeta = result.meta as Record<string, unknown> | null | undefined;
+        const meta = rawMeta
+            ? {
+                ...rawMeta,
+                totalPage: (rawMeta.totalPage as number) ?? (rawMeta.totalPages as number) ?? 1,
+            }
+            : null;
 
         return {
-            success: !!result.data,
+            success: true,
             data: medicines,
-            meta: meta,
-            error: result.error || null,
+            meta,
+            error: null,
         };
     } catch (error) {
         console.error("Action fetchAllMedicines Error:", error);
-        return { success: false, data: [], error: "Failed to fetch medicines" };
+        return { success: false, data: [], meta: null, error: "Failed to fetch medicines" };
     }
 };
 

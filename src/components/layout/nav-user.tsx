@@ -18,6 +18,16 @@ export function NavUser({ user }: { user: any }) {
     const router = useRouter();
 
     const handleLogout = async () => {
+        try {
+            await fetch("/api/v1/auth/logout", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({}),
+            });
+        } catch {
+            /* ignore */
+        }
         await authClient.signOut({
             fetchOptions: {
                 onSuccess: () => {

@@ -16,10 +16,23 @@ const nextConfig = {
         },
     },
     async rewrites() {
+        const backend = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:5000";
         return [
             {
                 source: "/api/auth/:path*",
-                destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/:path*`,
+                destination: `${backend}/api/auth/:path*`,
+            },
+            {
+                source: "/api/v1/auth/:path*",
+                destination: `${backend}/api/v1/auth/:path*`,
+            },
+            {
+                source: "/api/notifications",
+                destination: `${backend}/api/notifications`,
+            },
+            {
+                source: "/api/notifications/:path*",
+                destination: `${backend}/api/notifications/:path*`,
             },
         ];
     },

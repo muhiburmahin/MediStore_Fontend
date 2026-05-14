@@ -38,7 +38,7 @@ export default function ShopPage() {
       const response = await fetchAllMedicines({
         page: currentPage.toString(),
         limit: itemsPerPage.toString(),
-        search: searchQuery,
+        search: searchQuery.trim() || undefined,
         sortBy: sortBy,
         sortOrder: sortOrder
       });
@@ -46,6 +46,9 @@ export default function ShopPage() {
       if (response && response.success) {
         setMedicines(response.data);
         setMeta(response.meta as MetaData);
+      } else {
+        setMedicines([]);
+        setMeta(null);
       }
     } catch (error) {
       console.error("Failed to load medicines:", error);

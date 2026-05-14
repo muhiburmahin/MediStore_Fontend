@@ -1,9 +1,17 @@
-import Banner from "@/components/modules/home/Banner";
+import HeroSection from "@/components/modules/home/Hiro";
 import CategoryList from "@/components/modules/home/CategoryList";
 import MedicineList from "@/components/modules/home/FeaturedMedicines";
 import WhyChooseUs from "@/components/modules/home/WhyChooseUs";
+import HomeStatsStrip from "@/components/modules/home/HomeStatsStrip";
+import HowItWorksSection from "@/components/modules/home/HowItWorksSection";
+import DeliveryTrustSection from "@/components/modules/home/DeliveryTrustSection";
+import BrandsStrip from "@/components/modules/home/BrandsStrip";
+import TestimonialsSection from "@/components/modules/home/TestimonialsSection";
+import NewsletterSection from "@/components/modules/home/NewsletterSection";
 import { fetchAllCategories } from "@/actions/category.action";
 import { fetchAllMedicines } from "@/actions/medicine.action";
+
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const categoriesRes = await fetchAllCategories();
@@ -17,8 +25,12 @@ export default async function Home() {
 
       <section className="w-full overflow-hidden mb-0">
         <div className="animate-in fade-in slide-in-from-top-4 duration-1000">
-          <Banner />
+          <HeroSection />
         </div>
+      </section>
+
+      <section>
+        <HomeStatsStrip />
       </section>
 
       <section className="py-1 md:py-8">
@@ -29,8 +41,28 @@ export default async function Home() {
         <MedicineList medicines={medicines} />
       </section>
 
+      <section>
+        <HowItWorksSection />
+      </section>
+
+      <section>
+        <DeliveryTrustSection />
+      </section>
+
+      <section>
+        <BrandsStrip />
+      </section>
+
       <section className="py-2 md:py-12">
         <WhyChooseUs />
+      </section>
+
+      <section>
+        <TestimonialsSection />
+      </section>
+
+      <section>
+        <NewsletterSection />
       </section>
 
     </main>

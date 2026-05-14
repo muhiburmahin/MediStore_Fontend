@@ -6,6 +6,8 @@ const API_URL = env.API_URL;
 
 interface GetMedicineParams {
     search?: string;
+    category?: string;
+    categoryId?: string;
     page?: string;
     limit?: string;
     sortOrder?: string;

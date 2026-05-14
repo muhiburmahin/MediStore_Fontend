@@ -6,42 +6,42 @@ import { revalidateTag } from "next/cache";
 
 export const userService = {
     getSession: async function () {
-        const AUTH_URL = env.AUTH_URL;
         const cookieStore = await cookies();
         const cookieString = cookieStore
             .getAll()
             .map((cookie) => `${cookie.name}=${cookie.value}`)
             .join("; ");
 
+        const origin = env.FRONTEND_URL.replace(/\/$/, "");
+
         try {
-            const res = await fetch(`${AUTH_URL}/get-session`, {
+            const res = await fetch(`${origin}/api/auth/get-session`, {
                 method: "GET",
                 headers: {
-                    "Cookie": cookieString,
-                    "Accept": "application/json",
+                    Cookie: cookieString,
+                    Accept: "application/json",
                 },
                 cache: "no-store",
             });
 
             const session = await res.json();
 
-            if (!res.ok || !session) {
+            if (!res.ok || !session?.user) {
                 return {
                     data: null,
-                    error: "No session found"
+                    error: "No session found",
                 };
             }
 
             return {
                 data: session,
-                error: null
+                error: null,
             };
-        }
-        catch (error) {
+        } catch (error) {
             console.error("Backend fetch error:", error);
             return {
                 data: null,
-                error: "Something Went wrong"
+                error: "Something Went wrong",
             };
         }
     },
@@ -120,15 +120,15 @@ export const userService = {
                 },
                 cache: "no-store",
             });
-            const session = await res.json();
-            if (session === null) {
+            const result = await res.json();
+            if (!res.ok) {
                 return {
                     data: null,
-                    error: { message: "No session found", error: null },
+                    error: { message: result?.message ?? "Failed to load stats", error: null },
                 };
             }
 
-            return { data: session, error: null };
+            return { data: result.data ?? null, error: null };
         } catch (error) {
             console.error(error);
             return {
@@ -148,15 +148,15 @@ export const userService = {
                 },
                 cache: "no-store",
             });
-            const session = await res.json();
-            if (session === null) {
+            const result = await res.json();
+            if (!res.ok) {
                 return {
                     data: null,
-                    error: { message: "No session found", error: null },
+                    error: { message: result?.message ?? "Failed to load seller stats", error: null },
                 };
             }
 
-            return { data: session, error: null };
+            return { data: result.data ?? null, error: null };
         } catch (error) {
             console.error(error);
             return {
@@ -184,7 +184,9 @@ export const userService = {
                 };
             }
 
-            return { data: result.data || result.stats, error: null };
+            const payload = result.data;
+            const stats = payload?.stats ?? payload;
+            return { data: stats ? { stats } : null, error: null };
         } catch (error) {
             console.error("Admin Stats Fetch Error:", error);
             return { data: null, error: "Something went wrong" };
@@ -233,7 +235,10 @@ export const userService = {
             });
 
             const result = await res.json();
-            return { data: result.data, error: res.ok ? null : result.message };
+            if (!res.ok) {
+                return { data: null, error: result?.message ?? "Stats fetch failed" };
+            }
+            return { data: result.data ?? null, error: null };
         } catch (error) {
             return { data: null, error: "Stats fetch failed" };
         }

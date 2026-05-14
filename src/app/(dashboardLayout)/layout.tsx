@@ -32,8 +32,8 @@ export default async function DashboardLayout({
     customer: React.ReactNode;
 }>) {
     const { data } = await userService.getSession();
-    const user = data.user;
-    const role = data?.user?.role as Role | undefined;
+    const user = data?.user;
+    const role = user?.role as Role | undefined;
 
     const roleView = {
         ADMIN: admin,

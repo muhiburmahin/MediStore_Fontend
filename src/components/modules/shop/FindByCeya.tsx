@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { LayoutGrid, ChevronRight, ChevronLeft, Check, PackageSearch, Loader2 } from "lucide-react";
+import { LayoutGrid, ChevronRight, ChevronLeft, Check, PackageSearch, Loader2, Search } from "lucide-react";
 import MedicineCard from "../shared/MedicineCard";
 import { Medicine } from "@/types/medicine.type";
 import { fetchAllMedicines } from "@/actions/medicine.action";
@@ -27,6 +27,7 @@ export default function FindByCeta() {
     const [loading, setLoading] = useState(true);
     const [catLoading, setCatLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState<string>("All");
+    const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [meta, setMeta] = useState<MetaData | null>(null);
     const itemsPerPage = 12;
@@ -54,9 +55,10 @@ export default function FindByCeta() {
                 page: currentPage.toString(),
                 limit: itemsPerPage.toString(),
                 category: selectedCategory === "All" ? undefined : selectedCategory,
+                search: searchQuery.trim() || undefined,
             });
 
-            if (response?.data) {
+            if (response?.success && response.data) {
                 setMedicines(response.data);
                 if (response.meta) setMeta(response.meta as MetaData);
             } else {
@@ -67,10 +69,13 @@ export default function FindByCeta() {
         } finally {
             setLoading(false);
         }
-    }, [currentPage, selectedCategory]);
+    }, [currentPage, selectedCategory, searchQuery]);
 
     useEffect(() => {
-        loadMedicines();
+        const t = setTimeout(() => {
+            loadMedicines();
+        }, 400);
+        return () => clearTimeout(t);
     }, [loadMedicines]);
 
     const totalPages = meta?.totalPage || 1;
@@ -136,6 +141,19 @@ export default function FindByCeta() {
                 </aside>
 
                 <main className="flex-1 w-full">
+                    <div className="relative mb-8 max-w-md">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                        <input
+                            type="search"
+                            placeholder="Search in this category..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full pl-12 pr-4 py-3 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-medium outline-none focus:border-blue-600"
+                        />
+                    </div>
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-32">
                             <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
@@ -145,7 +163,7 @@ export default function FindByCeta() {
                         <>
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {medicines.map((med) => (
-                                    <MedicineCard key={med.id || med.id} medicine={med} />
+                                    <MedicineCard key={med.id} medicine={med} />
                                 ))}
                             </div>
 

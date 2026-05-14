@@ -12,6 +12,7 @@ import { updateUser } from "@/actions/user.actions";
 import { Camera, Mail, ShieldCheck, User as UserIcon, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChangePasswordCard } from "@/components/modules/ChangePasswordCard";
 
 const emptyToUndefined = (v: unknown) => (v === "" ? undefined : v);
 
@@ -193,6 +194,8 @@ export default function MyProfile({ user }: { user: User }) {
                     </CardContent>
                 </Card>
             </div>
+
+            <ChangePasswordCard />
         </div>
     );
 }

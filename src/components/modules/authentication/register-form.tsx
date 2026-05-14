@@ -4,35 +4,68 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useForm } from "@tanstack/react-form";
-import { zodValidator } from "@tanstack/zod-form-adapter";
-import { authClient } from "@/lib/auth-client";
 import * as z from "zod";
-import { toast, Toaster } from "sonner";
-import {
-  Chrome,
-  Lock,
-  Mail,
-  User,
-  Eye,
-  EyeOff,
-  Loader2,
-  Camera
-} from "lucide-react";
+import { toast } from "sonner";
+import { Chrome, Lock, Mail, User, Eye, EyeOff, Loader2, Camera, UserRound, Store } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { isAllowedMailboxEmail } from "@/lib/email-policy";
+import { toastApiFlattenedErrors, toastZodIssues } from "@/lib/validation-toasts";
+import { DEMO_REGISTER_PREFILL } from "@/lib/demo-accounts";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-// schima velidation
-const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  role: z.enum(["CUSTOMER", "SELLER"]),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(1, "Confirm password is required"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const mailboxEmail = z
+  .string()
+  .email("Invalid email address")
+  .refine((e) => isAllowedMailboxEmail(e), {
+    message:
+      "Use a real email provider (temporary or disposable addresses are not allowed)",
+  });
+
+const registerSchema = z
+  .object({
+    name: z.string().min(3, "Name must be at least 3 characters"),
+    email: mailboxEmail,
+    role: z.enum(["CUSTOMER", "SELLER"]),
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number"),
+    confirmPassword: z.string().min(1, "Confirm password is required"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
+
+async function postAuthJson(path: string, body: unknown) {
+  const res = await fetch(path, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const json = (await res.json().catch(() => ({}))) as {
+    success?: boolean;
+    message?: string;
+    errors?: { formErrors?: string[]; fieldErrors?: Record<string, string[] | undefined> };
+  };
+  return { res, json };
+}
+
+const inputClass =
+  "flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-[color,box-shadow] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30";
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -54,203 +87,288 @@ export function RegisterForm() {
       role: "CUSTOMER" as "CUSTOMER" | "SELLER",
     } as RegisterFormValues,
 
-    //validatorAdapter: zodValidator(),
-    validators: {
-      onChange: registerSchema,
-    },
     onSubmit: async ({ value }) => {
+      const parsed = registerSchema.safeParse(value);
+      if (!parsed.success) {
+        toastZodIssues(parsed.error);
+        return;
+      }
+
       setLoading(true);
-      const toastId = toast.loading("Creating account...");
+      const toastId = toast.loading("Creating your account…");
       try {
-        const { error } = await authClient.signUp.email({
-          email: value.email,
-          password: value.password,
-          name: value.name,
-          callbackURL: "/",
+        const { res, json } = await postAuthJson("/api/v1/auth/register", {
+          name: parsed.data.name,
+          email: parsed.data.email,
+          password: parsed.data.password,
+          role: parsed.data.role,
         });
 
-        if (error) {
-          toast.error(error.message || "Registration failed", { id: toastId });
-        } else {
-          toast.success(`Welcome ${value.name}! Registration Successful.`, { id: toastId });
-          router.push("/login");
+        if (!res.ok) {
+          if (json.errors) toastApiFlattenedErrors(json.errors);
+          else toast.error(json.message || "Registration failed", { id: toastId });
+          return;
         }
-      } catch (err) {
-        toast.error("An unexpected error occurred", { id: toastId });
+
+        toast.success(`Welcome, ${parsed.data.name}! You can sign in now.`, { id: toastId });
+        router.push("/login");
+        router.refresh();
+      } catch {
+        toast.error("Something went wrong. Try again.", { id: toastId });
       } finally {
         setLoading(false);
       }
     },
   });
 
+  const prefillDemo = (kind: keyof typeof DEMO_REGISTER_PREFILL) => {
+    const d = DEMO_REGISTER_PREFILL[kind];
+    form.setFieldValue("name", d.name);
+    form.setFieldValue("email", d.email);
+    form.setFieldValue("password", d.password);
+    form.setFieldValue("confirmPassword", d.password);
+    form.setFieldValue("role", d.role);
+    toast.message("Demo fields applied", {
+      description: "Use only if these emails are not already registered (run backend seed first).",
+    });
+  };
+
   return (
-    <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl border-t-8 border-blue-600 w-full max-w-lg mx-auto transition-all duration-300">
-      <Toaster richColors position="top-center" />
-
-      {/* Header */}
-      <div className="text-center mb-6">
-        <div className="flex flex-col items-center gap-3 mb-2">
-          <div className="relative w-20 h-20 shadow-xl rounded-2xl overflow-hidden border-2 border-slate-100 bg-white">
-            <Image src="/logo.png" alt="Logo" fill className="object-contain p-1" />
-          </div>
-          <h2 className="text-4xl font-black tracking-tight">
-            <span className="text-blue-600">Medi</span><span className="text-green-500">Store</span>
-          </h2>
+    <Card className="w-full max-w-lg border shadow-md">
+      <CardHeader className="space-y-4 text-center">
+        <div className="mx-auto relative size-16 overflow-hidden rounded-xl border bg-background shadow-sm">
+          <Image src="/logo.png" alt="MediStore" fill className="object-contain p-1.5" priority />
         </div>
-        <p className="text-lg font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent italic">
-          Create Your Account
-        </p>
-      </div>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          form.handleSubmit();
-        }}
-        className="space-y-4"
-      >
-        {/* Photo Upload */}
-        <div className="flex flex-col items-center mb-6">
-          <label className="relative cursor-pointer group">
-            <div className={`w-24 h-24 rounded-full border-4 border-double ${imagePreview ? 'border-green-500' : 'border-blue-600'} flex items-center justify-center overflow-hidden bg-slate-50 shadow-inner group-hover:opacity-80 transition-all`}>
-              {imagePreview ? (
-                <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
-              ) : (
-                <Camera className="text-blue-600" size={32} />
-              )}
-            </div>
-            <input type="file" className="hidden" onChange={handleImageChange} />
-          </label>
-          <span className="text-[10px] mt-2 text-slate-500 font-bold uppercase tracking-widest">Profile Photo</span>
+        <div className="space-y-1">
+          <CardTitle className="text-2xl font-semibold tracking-tight">Create account</CardTitle>
+          <CardDescription>Register as a customer or seller. Password must include a lowercase letter and a number.</CardDescription>
         </div>
+      </CardHeader>
 
-        {/* Input Fields Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <form.Field name="name">
-            {(field) => (
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 flex items-center gap-1">
-                  <User size={14} className="text-blue-600" /> Full Name
-                </label>
-                <input
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your full name"
-                />
-                {field.state.meta.errors && <p className="text-red-500 text-[10px] font-bold uppercase">{field.state.meta.errors.join(", ")}</p>}
-              </div>
-            )}
-          </form.Field>
-
-          <form.Field name="email">
-            {(field) => (
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 flex items-center gap-1">
-                  <Mail size={14} className="text-blue-600" /> Email Address
-                </label>
-                <input
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="mail@example.com"
-                />
-                {field.state.meta.errors && <p className="text-red-500 text-[10px] font-bold uppercase">{field.state.meta.errors.join(", ")}</p>}
-              </div>
-            )}
-          </form.Field>
-        </div>
-
-        {/* Role Selector */}
-        <form.Field name="role">
-          {(field) => (
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1">Join As</label>
-              <select
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value as "CUSTOMER" | "SELLER")}
-                className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none font-medium"
+      <CardContent>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+          className="space-y-5"
+        >
+          <div className="flex flex-col items-center gap-2">
+            <label className="relative cursor-pointer">
+              <span className="sr-only">Profile photo</span>
+              <div
+                className={cn(
+                  "flex size-24 items-center justify-center overflow-hidden rounded-full border-2 border-dashed bg-muted/50 transition-colors hover:bg-muted",
+                  imagePreview ? "border-primary" : "border-muted-foreground/30"
+                )}
               >
-                <option value="CUSTOMER">Customer (Buy Medicines)</option>
-                <option value="SELLER">Seller (Shop Owner)</option>
-              </select>
-            </div>
-          )}
-        </form.Field>
+              <div
+                className={cn(
+                  "size-full bg-cover bg-center",
+                  imagePreview ? "" : "hidden"
+                )}
+                style={imagePreview ? { backgroundImage: `url(${imagePreview})` } : undefined}
+                role={imagePreview ? "img" : undefined}
+                aria-label={imagePreview ? "Profile preview" : undefined}
+              />
+              {!imagePreview && <Camera className="size-8 text-muted-foreground" aria-hidden />}
+              </div>
+              <input type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
+            </label>
+            <span className="text-xs text-muted-foreground">Optional profile photo</span>
+          </div>
 
-        {/* Password Fields Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <form.Field name="password">
+          <div className="rounded-lg border bg-muted/40 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Prefill demo (optional)</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              If you already ran <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">npm run seed</code>{" "}
+              on the backend, these emails exist — registration will fail until you use different emails.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => prefillDemo("customer")}>
+                <UserRound className="size-3.5 text-sky-600" />
+                Demo customer
+              </Button>
+              <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => prefillDemo("seller")}>
+                <Store className="size-3.5 text-emerald-600" />
+                Demo seller
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <form.Field name="name">
+              {(field) => (
+                <div className="space-y-2 sm:col-span-1">
+                  <label htmlFor="reg-name" className="text-sm font-medium leading-none">
+                    Full name
+                  </label>
+                  <div className="relative">
+                    <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      id="reg-name"
+                      autoComplete="name"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      className={cn(inputClass, "pl-10")}
+                      placeholder="Your full name"
+                    />
+                  </div>
+                  {field.state.meta.errors && (
+                    <p className="text-xs font-medium text-destructive">{field.state.meta.errors.join(", ")}</p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+
+            <form.Field name="email">
+              {(field) => (
+                <div className="space-y-2 sm:col-span-1">
+                  <label htmlFor="reg-email" className="text-sm font-medium leading-none">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      id="reg-email"
+                      type="email"
+                      autoComplete="email"
+                      spellCheck={false}
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      className={cn(inputClass, "pl-10")}
+                      placeholder="you@example.com"
+                    />
+                  </div>
+                  {field.state.meta.errors && (
+                    <p className="text-xs font-medium text-destructive">{field.state.meta.errors.join(", ")}</p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+          </div>
+
+          <form.Field name="role">
             {(field) => (
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1 flex items-center gap-1">
-                  <Lock size={14} className="text-blue-600" /> Password
+              <div className="space-y-2">
+                <label htmlFor="reg-role" className="text-sm font-medium leading-none">
+                  I am registering as
                 </label>
-                <div className="relative">
+                <select
+                  id="reg-role"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value as "CUSTOMER" | "SELLER")}
+                  className={cn(inputClass, "h-11")}
+                >
+                  <option value="CUSTOMER">Customer — browse and buy medicines</option>
+                  <option value="SELLER">Seller — manage my shop listings</option>
+                </select>
+              </div>
+            )}
+          </form.Field>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <form.Field name="password">
+              {(field) => (
+                <div className="space-y-2">
+                  <label htmlFor="reg-password" className="text-sm font-medium leading-none">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      id="reg-password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      className={cn(inputClass, "pr-10 pl-10")}
+                      placeholder="Min. 6 characters"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:bg-muted"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">Use at least one lowercase letter and one number.</p>
+                  {field.state.meta.errors && (
+                    <p className="text-xs font-medium text-destructive">{field.state.meta.errors.join(", ")}</p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+
+            <form.Field name="confirmPassword">
+              {(field) => (
+                <div className="space-y-2">
+                  <label htmlFor="reg-confirm" className="text-sm font-medium leading-none">
+                    Confirm password
+                  </label>
                   <input
+                    id="reg-confirm"
                     type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="••••••••"
+                    className={inputClass}
+                    placeholder="Re-enter password"
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600">
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
+                  {field.state.meta.errors && (
+                    <p className="text-xs font-medium text-destructive">{field.state.meta.errors.join(", ")}</p>
+                  )}
                 </div>
-                {field.state.meta.errors && <p className="text-red-500 text-[10px] font-bold uppercase">{field.state.meta.errors.join(", ")}</p>}
-              </div>
-            )}
-          </form.Field>
-
-          <form.Field name="confirmPassword">
-            {(field) => (
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1">Confirm Password</label>
-                <input
-                  type="password"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="••••••••"
-                />
-                {field.state.meta.errors && <p className="text-red-500 text-[10px] font-bold uppercase">{field.state.meta.errors.join(", ")}</p>}
-              </div>
-            )}
-          </form.Field>
-        </div>
-
-        {/* Buttons */}
-        <div className="space-y-4 pt-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white p-3.5 rounded-xl font-black text-lg shadow-xl active:scale-95 disabled:grayscale flex justify-center items-center transition-all"
-          >
-            {loading ? <Loader2 className="animate-spin mr-2" /> : "REGISTER NOW"}
-          </button>
-
-          <div className="relative flex items-center py-1">
-            <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
-            <span className="flex-shrink mx-4 text-slate-400 text-[10px] font-bold uppercase">Or Join With</span>
-            <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+              )}
+            </form.Field>
           </div>
 
-          <button
-            type="button"
-            onClick={async () => await authClient.signIn.social({ provider: "google", callbackURL: "http://localhost:3000" })}
-            className="w-full bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 flex items-center justify-center gap-3 p-3 rounded-xl active:scale-95 hover:bg-slate-50 transition-all group"
-          >
-            <Chrome className="text-red-500 group-hover:rotate-12 transition-transform" size={20} />
-            <span className="font-bold text-slate-700 dark:text-slate-200">Continue with Google</span>
-          </button>
-        </div>
-      </form>
+          <Button type="submit" className="h-11 w-full text-base font-semibold" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Creating account…
+              </>
+            ) : (
+              "Create account"
+            )}
+          </Button>
 
-      <p className="text-center text-sm text-slate-600 dark:text-slate-400 mt-8 font-medium">
-        Already have an account? <Link href="/login" className="text-blue-600 font-bold hover:underline underline-offset-4">Log In</Link>
-      </p>
-    </div>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 w-full"
+            onClick={() => {
+              const redirect = encodeURIComponent("/");
+              window.location.href = `/api/v1/auth/login/google?redirect=${redirect}`;
+            }}
+          >
+            <Chrome className="size-4 text-red-500" />
+            Google
+          </Button>
+        </form>
+      </CardContent>
+
+      <CardFooter className="flex flex-col gap-2 border-t pt-6">
+        <p className="text-center text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
+            Sign in
+          </Link>
+        </p>
+      </CardFooter>
+    </Card>
   );
 }
