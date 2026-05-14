@@ -24,10 +24,9 @@ import { cn } from "@/lib/utils";
 
 const mailboxEmail = z
   .string()
-  .email("Invalid email address")
+  .email("Your email is not correct.")
   .refine((e) => isAllowedMailboxEmail(e), {
-    message:
-      "Use a real email provider (temporary or disposable addresses are not allowed)",
+    message: "Your email is not correct.",
   });
 
 const registerSchema = z
@@ -65,7 +64,7 @@ async function postAuthJson(path: string, body: unknown) {
 }
 
 const inputClass =
-  "flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-[color,box-shadow] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30";
+  "flex h-11 w-full rounded-md border border-input bg-background/90 px-3 py-2 text-sm ring-offset-background transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-900/80";
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -110,8 +109,14 @@ export function RegisterForm() {
           return;
         }
 
-        toast.success(`Welcome, ${parsed.data.name}! You can sign in now.`, { id: toastId });
-        router.push("/login");
+        toast.success("Registration successful", { id: toastId });
+        const needsVerify = typeof json.message === "string" && json.message.toLowerCase().includes("verify");
+        if (needsVerify) {
+          toast.info("Please verify your email first", {
+            description: "We sent a verification link to your inbox. After verifying, you can sign in.",
+          });
+        }
+        router.push(needsVerify ? "/login?verify=1&registered=1" : "/login?registered=1");
         router.refresh();
       } catch {
         toast.error("Something went wrong. Try again.", { id: toastId });
@@ -134,16 +139,21 @@ export function RegisterForm() {
   };
 
   return (
-    <Card className="w-full max-w-lg border shadow-md">
-      <CardHeader className="space-y-4 text-center">
-        <div className="mx-auto relative size-16 overflow-hidden rounded-xl border bg-background shadow-sm">
-          <Image src="/logo.png" alt="MediStore" fill className="object-contain p-1.5" priority />
-        </div>
-        <div className="space-y-1">
-          <CardTitle className="text-2xl font-semibold tracking-tight">Create account</CardTitle>
-          <CardDescription>Register as a customer or seller. Password must include a lowercase letter and a number.</CardDescription>
-        </div>
-      </CardHeader>
+    <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/30 bg-gradient-to-br from-emerald-500/15 via-white to-blue-500/20 p-[1px] shadow-2xl shadow-emerald-500/10 dark:from-emerald-900/25 dark:via-slate-950 dark:to-blue-900/25 dark:border-slate-700/50">
+      <Card className="rounded-[22px] border-0 bg-card/95 shadow-none backdrop-blur-sm dark:bg-slate-950/90">
+        <CardHeader className="space-y-4 text-center">
+          <div className="relative mx-auto size-16 overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-blue-500/10 shadow-inner">
+            <Image src="/logo.png" alt="MediStore" fill className="object-contain p-1.5" priority />
+          </div>
+          <div className="space-y-1">
+            <CardTitle className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-2xl font-bold tracking-tight text-transparent">
+              Create your MediStore account
+            </CardTitle>
+            <CardDescription>
+              Register as a customer or seller. Password must include a lowercase letter and a number.
+            </CardDescription>
+          </div>
+        </CardHeader>
 
       <CardContent>
         <form
@@ -179,18 +189,30 @@ export function RegisterForm() {
             <span className="text-xs text-muted-foreground">Optional profile photo</span>
           </div>
 
-          <div className="rounded-lg border bg-muted/40 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Prefill demo (optional)</p>
+          <div className="rounded-2xl border border-dashed border-emerald-500/25 bg-gradient-to-r from-emerald-500/5 to-blue-500/5 p-4">
+            <p className="text-xs font-bold uppercase tracking-wide text-emerald-800/90 dark:text-emerald-300/90">Quick demo</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              If you already ran <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">npm run seed</code>{" "}
-              on the backend, these emails exist — registration will fail until you use different emails.
+              After <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">npm run seed</code>, these emails
+              already exist — use other emails to register, or only use prefills to explore the form.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => prefillDemo("customer")}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-2 border-sky-200 hover:bg-sky-50 dark:border-sky-900 dark:hover:bg-sky-950/40"
+                onClick={() => prefillDemo("customer")}
+              >
                 <UserRound className="size-3.5 text-sky-600" />
                 Demo customer
               </Button>
-              <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => prefillDemo("seller")}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-2 border-emerald-200 hover:bg-emerald-50 dark:border-emerald-900 dark:hover:bg-emerald-950/40"
+                onClick={() => prefillDemo("seller")}
+              >
                 <Store className="size-3.5 text-emerald-600" />
                 Demo seller
               </Button>
@@ -326,7 +348,11 @@ export function RegisterForm() {
             </form.Field>
           </div>
 
-          <Button type="submit" className="h-11 w-full text-base font-semibold" disabled={loading}>
+          <Button
+            type="submit"
+            className="h-11 w-full bg-gradient-to-r from-emerald-600 to-blue-600 text-base font-bold text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-700 hover:to-blue-700"
+            disabled={loading}
+          >
             {loading ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
@@ -349,26 +375,26 @@ export function RegisterForm() {
           <Button
             type="button"
             variant="outline"
-            className="h-11 w-full"
+            className="h-11 w-full border-2"
             onClick={() => {
-              const redirect = encodeURIComponent("/");
-              window.location.href = `/api/v1/auth/login/google?redirect=${redirect}`;
+              window.location.href = "/api/v1/auth/login/google";
             }}
           >
             <Chrome className="size-4 text-red-500" />
             Google
           </Button>
         </form>
-      </CardContent>
+        </CardContent>
 
-      <CardFooter className="flex flex-col gap-2 border-t pt-6">
-        <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
-            Sign in
-          </Link>
-        </p>
-      </CardFooter>
-    </Card>
+        <CardFooter className="flex flex-col gap-2 border-t pt-6">
+          <p className="text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link href="/login" className="font-bold text-blue-600 underline-offset-4 hover:underline dark:text-sky-400">
+              Sign in
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }

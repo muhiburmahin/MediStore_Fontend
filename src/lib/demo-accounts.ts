@@ -1,23 +1,20 @@
 /**
- * Demo credentials shown on auth screens — keep in sync with MediStore_Backend `src/scripts/seed.ts` defaults.
+ * Demo credentials — keep in sync with MediStore_Backend `src/scripts/seed.ts` defaults / `.env`.
  */
 export const DEMO_LOGIN = {
   admin: {
     title: "Admin",
-    description: "Platform & catalog",
     email: "developermdmahin@gmail.com",
     password: "pass1234a",
   },
   seller: {
     title: "Seller",
-    description: "List medicines & orders",
-    email: "demo.seller@medistore.com",
+    email: "mdmahincse@gmail.com",
     password: "pass1234a",
   },
   customer: {
     title: "Customer",
-    description: "Browse & purchase",
-    email: "demo.customer@medistore.com",
+    email: "muhiburmahin.edu@gmail.com",
     password: "pass1234a",
   },
 } as const;
@@ -25,14 +22,14 @@ export const DEMO_LOGIN = {
 export const DEMO_REGISTER_PREFILL = {
   customer: {
     name: "Demo Customer",
-    email: DEMO_LOGIN.customer.email,
-    password: DEMO_LOGIN.customer.password,
+    email: "muhiburmahin.edu@gmail.com",
+    password: "pass1234a",
     role: "CUSTOMER" as const,
   },
   seller: {
     name: "Demo Seller",
-    email: DEMO_LOGIN.seller.email,
-    password: DEMO_LOGIN.seller.password,
+    email: "mdmahincse@gmail.com",
+    password: "pass1234a",
     role: "SELLER" as const,
   },
 } as const;

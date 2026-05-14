@@ -60,6 +60,8 @@ export default function MedicineTable({ medicines, meta, categories, user }: Med
     const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null);
     const [isPending, startTransition] = useTransition();
 
+    const rowOffset = meta ? (meta.page - 1) * meta.limit : 0;
+
     const form = useForm({
         defaultValues: {
             name: "",
@@ -152,7 +154,7 @@ export default function MedicineTable({ medicines, meta, categories, user }: Med
                                 <TableBody className="divide-y divide-slate-50 dark:divide-slate-900">
                                     {medicines.map((medicine, index) => (
                                         <TableRow key={medicine.id} className="border-none hover:bg-blue-50/50 dark:hover:bg-slate-900/50 transition-colors group">
-                                            <TableCell className="font-bold text-slate-400 dark:text-slate-600 pl-6">{index + 1}</TableCell>
+                                            <TableCell className="font-bold text-slate-400 dark:text-slate-600 pl-6">{rowOffset + index + 1}</TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <div className="h-10 w-10 rounded-xl overflow-hidden border border-blue-100 dark:border-slate-800 bg-blue-50 dark:bg-slate-900 relative shrink-0 shadow-inner">
@@ -191,9 +193,14 @@ export default function MedicineTable({ medicines, meta, categories, user }: Med
                         </div>
                     </div>
 
-                    {meta && meta.totalPages > 1 && (
+                    {meta && meta.total > 0 && (
                         <div className="mt-8 flex justify-center">
-                            <MedicinesPagination meta={meta} />
+                            <MedicinesPagination
+                                meta={{
+                                    ...meta,
+                                    totalPages: Math.max(1, meta.totalPages || 1),
+                                }}
+                            />
                         </div>
                     )}
                 </>

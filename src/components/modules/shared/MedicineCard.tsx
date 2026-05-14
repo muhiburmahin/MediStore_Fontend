@@ -3,12 +3,13 @@
 import Image from "next/image";
 import { Medicine } from "@/types/medicine.type";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Heart, Info, Star, Tag, Images } from "lucide-react";
+import { ShoppingCart, Star, Tag, Images } from "lucide-react";
 import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/store/slice/cartSlice";
 import { AppDispatch } from "@/store";
 import Link from "next/link";
+import { WishlistHeartButton } from "@/components/modules/wishlist/WishlistHeartButton";
 
 interface MedicineCardProps {
     medicine: Medicine;
@@ -55,11 +56,15 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
             whileHover={{ y: -5 }}
             className="group relative w-full bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
         >
-            {/* Badges & Indicators */}
-            <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                <button className="p-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-100 dark:border-slate-700 text-slate-400 hover:text-red-500 transition-colors shadow-sm">
-                    <Heart className="w-4 h-4" />
-                </button>
+            {/* Badges & Indicators — z-20 so clicks beat the image <Link> layer */}
+            <div className="pointer-events-none absolute top-4 right-4 z-20 flex flex-col gap-2">
+                <div className="pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                    <WishlistHeartButton
+                        medicineId={medicine.id}
+                        size="sm"
+                        className="h-9 w-9 border border-slate-100 bg-white/90 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90"
+                    />
+                </div>
                 {medicine.images && medicine.images.length > 1 && (
                     <div className="p-2 rounded-full bg-blue-600 text-white shadow-lg">
                         <Images className="w-3.5 h-3.5" />
@@ -68,7 +73,7 @@ export default function MedicineCard({ medicine }: MedicineCardProps) {
             </div>
 
             {/* Image Section */}
-            <Link href={`/medicine/${medicine.id}`}>
+            <Link href={`/medicine/${medicine.id}`} className="relative z-0 block">
                 <div className="relative h-52 w-full bg-[#F8FAFC] dark:bg-slate-800/50 overflow-hidden cursor-pointer">
                     <Image
                         src={displayImage}

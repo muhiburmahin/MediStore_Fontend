@@ -15,6 +15,7 @@ export interface Order {
     phone?: string;
     status: OrderStatus;
     shippingAddress?: string;
+    paymentMethod?: string;
     paymentStatus?: string;
     totalAmount: number;
     createdAt: Date;
@@ -35,11 +36,13 @@ export interface OrderItem {
 }
 
 export interface CreateOrder {
-    customerId: string;
+    customerId?: string;
     shippingAddress: string;
+    phone?: string;
+    paymentMethod: "COD" | "STRIPE";
     items: {
         medicineId: string;
         quantity: number;
-        price: number;
-    }[]
+        price?: number;
+    }[];
 }

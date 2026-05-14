@@ -31,7 +31,11 @@ export const orderService = {
             }
 
             const updated = await res.json();
-            return { data: updated, error: null };
+            const orderPayload =
+                updated && typeof updated === "object" && "data" in updated
+                    ? (updated as { data: unknown }).data
+                    : updated;
+            return { data: orderPayload, error: null };
         } catch (error) {
             console.log(error);
             return {

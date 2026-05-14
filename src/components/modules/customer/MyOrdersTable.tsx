@@ -33,6 +33,22 @@ const reviewSchema = z.object({
     comment: z.string().min(10, "Comment must be at least 10 characters"),
 });
 
+function paymentDisplay(order: { paymentMethod?: string; paymentStatus?: string }) {
+    const method = (order.paymentMethod ?? "COD").toUpperCase();
+    const raw = (order.paymentStatus ?? "PENDING").toUpperCase();
+    const subtitle =
+        method === "COD" && raw === "PENDING"
+            ? "Pay when you receive (no online charge now)"
+            : method === "STRIPE" && raw === "PENDING"
+              ? "Complete card payment from checkout link"
+              : raw === "PAID"
+                ? "Paid"
+                : raw === "FAILED"
+                  ? "Payment failed"
+                  : raw;
+    return { method, raw, subtitle };
+}
+
 export default function MyOrdersTable({ orders, user }: { orders: any[]; user: any }) {
     const router = useRouter();
     const [selectedMedicineId, setSelectedMedicineId] = useState("");
@@ -104,6 +120,7 @@ export default function MyOrdersTable({ orders, user }: { orders: any[]; user: a
                         <TableRow className="hover:bg-transparent border-white/5">
                             <TableHead className="text-gray-400 font-bold py-4">Order ID</TableHead>
                             <TableHead className="text-gray-400 font-bold">Shipping Address</TableHead>
+                            <TableHead className="text-gray-400 font-bold">Payment</TableHead>
                             <TableHead className="text-gray-400 font-bold">Total</TableHead>
                             <TableHead className="text-gray-400 font-bold">Status</TableHead>
                             <TableHead className="text-right text-gray-400 font-bold">Action</TableHead>
@@ -113,10 +130,30 @@ export default function MyOrdersTable({ orders, user }: { orders: any[]; user: a
                         <AnimatePresence mode="popLayout">
                             {paginatedOrders.map((order) => {
                                 const config = orderStatusConfig[order.status] || orderStatusConfig.PLACED;
+                                const pay = paymentDisplay(order);
                                 return (
                                     <motion.tr key={order.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-white/5 hover:bg-white/[0.02]">
                                         <TableCell className="font-bold text-white py-4">#{order.id.slice(-6).toUpperCase()}</TableCell>
-                                        <TableCell className="max-w-[200px] truncate text-gray-400">{order.shippingAddress}</TableCell>
+                                        <TableCell className="max-w-[min(28rem,40vw)] whitespace-pre-wrap break-words text-left text-sm text-slate-600 dark:text-slate-300">
+                                            {order.shippingAddress}
+                                        </TableCell>
+                                        <TableCell className="align-top">
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">{pay.method}</span>
+                                                <span
+                                                    className={`inline-flex w-fit items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                                                        pay.raw === "PAID"
+                                                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                                                            : pay.raw === "FAILED"
+                                                              ? "border-red-500/30 bg-red-500/10 text-red-400"
+                                                              : "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                                                    }`}
+                                                >
+                                                    {pay.raw}
+                                                </span>
+                                                <span className="max-w-[12rem] text-[10px] font-medium leading-snug text-slate-500">{pay.subtitle}</span>
+                                            </div>
+                                        </TableCell>
                                         <TableCell className="font-bold text-white">৳{order.totalAmount}</TableCell>
                                         <TableCell>
                                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border tracking-wide uppercase ${config.color}`}>
@@ -151,6 +188,34 @@ export default function MyOrdersTable({ orders, user }: { orders: any[]; user: a
                         <DialogTitle className="flex items-center gap-3"><Package className="h-5 w-5 text-blue-400" /> Order Summary</DialogTitle>
                     </DialogHeader>
                     <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                        {selectedOrder && (() => {
+                            const pay = paymentDisplay(selectedOrder);
+                            return (
+                            <>
+                                <div className="grid gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-4 text-sm sm:grid-cols-2">
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Payment</p>
+                                        <p className="mt-1 font-bold text-white">
+                                            {pay.method} · {pay.raw}
+                                        </p>
+                                        <p className="mt-1 text-xs text-gray-400">{pay.subtitle}</p>
+                                    </div>
+                                    {selectedOrder.phone && (
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Phone</p>
+                                            <p className="mt-1 font-bold text-white">{selectedOrder.phone}</p>
+                                        </div>
+                                    )}
+                                </div>
+                                {selectedOrder.shippingAddress && (
+                                    <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Full address</p>
+                                        <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-gray-200">{selectedOrder.shippingAddress}</p>
+                                    </div>
+                                )}
+                            </>
+                            );
+                        })()}
                         {selectedOrder?.items?.map((item: any) => (
                             <div key={item.id} className="flex items-center justify-between p-4 border border-white/5 rounded-xl bg-white/[0.02]">
                                 <div className="flex items-center gap-4">

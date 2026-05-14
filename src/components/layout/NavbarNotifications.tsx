@@ -55,8 +55,8 @@ export function NavbarNotifications({ signedIn }: { signedIn: boolean }) {
   }, [signedIn]);
 
   useEffect(() => {
-    if (open && signedIn) void load();
-  }, [open, signedIn, load]);
+    if (signedIn) void load();
+  }, [signedIn, load]);
 
   const unread = items.filter((n) => !n.isRead).length;
 
@@ -111,7 +111,13 @@ export function NavbarNotifications({ signedIn }: { signedIn: boolean }) {
   }
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) void load();
+      }}
+    >
       <DropdownMenuTrigger asChild>
         <Button
           type="button"

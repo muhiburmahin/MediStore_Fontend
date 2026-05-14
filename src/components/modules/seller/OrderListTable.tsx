@@ -230,7 +230,7 @@ function InfoCard({ icon, label, value }: { icon: React.ReactNode, label: string
             </div>
             <div className="min-w-0">
                 <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter mb-1">{label}</p>
-                <p className="text-sm font-extrabold text-slate-700 dark:text-slate-200 leading-tight break-words">{value}</p>
+                <p className="text-sm font-extrabold text-slate-700 dark:text-slate-200 leading-tight break-words whitespace-pre-wrap">{value}</p>
             </div>
         </div>
     );

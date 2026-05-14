@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { userService } from "@/services/user.service";
 import OrderStatusPie from "@/components/modules/seller/dashboard/Orders";
 import TotalsPie from "@/components/modules/seller/dashboard/Totals";
@@ -19,7 +18,7 @@ const COLOR_MAP: Record<string, string> = {
 };
 
 export default async function DashboardPage() {
-    const { data: response, error } = await userService.getSellerStats();
+    const { data: stats, error } = await userService.getSellerStats();
 
     if (error)
         return (
@@ -35,13 +34,14 @@ export default async function DashboardPage() {
             </div>
         );
 
-    const stats = response?.data;
-
-    if (!stats) return (
-        <div className="h-96 flex items-center justify-center italic text-slate-400 dark:text-slate-600 font-bold animate-pulse">
-            SYNCING COMMAND CENTER...
-        </div>
-    );
+    /* getSellerStats() already unwraps API `data` — do not use stats.data */
+    if (!stats || typeof stats !== "object") {
+        return (
+            <div className="h-96 flex items-center justify-center italic text-slate-400 dark:text-slate-600 font-bold">
+                No dashboard data available yet.
+            </div>
+        );
+    }
 
     const cardData = [
         { name: "Category", value: stats?.category?.total || 0, icon: Package, fill: COLOR_MAP["Category"] },

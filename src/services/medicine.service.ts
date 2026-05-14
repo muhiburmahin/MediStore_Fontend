@@ -83,6 +83,48 @@ export const medicineService = {
         }
     },
 
+    /** Authenticated seller (or admin) inventory; pass `dashboard: "true"` so API scopes SELLER to own medicines. */
+    getSellerMedicines: async (params?: GetMedicineParams) => {
+        try {
+            const cookieStore = await cookies();
+            const url = new URL(`${API_URL}/seller/medicines`);
+            url.searchParams.set("dashboard", "true");
+            if (params) {
+                Object.entries(params).forEach(([key, value]) => {
+                    if (value !== undefined && value !== null && value !== "") {
+                        url.searchParams.set(key, value as string);
+                    }
+                });
+            }
+
+            const res = await fetch(url.toString(), {
+                headers: {
+                    Cookie: cookieStore.toString(),
+                },
+                cache: "no-store",
+                next: { tags: ["medicines"] },
+            });
+            const responseData = await res.json();
+
+            if (!res.ok) {
+                return {
+                    data: null,
+                    meta: undefined,
+                    error: { message: responseData?.message ?? "No medicine found", error: null },
+                };
+            }
+
+            return {
+                data: responseData.data || [],
+                meta: responseData.meta,
+                error: null,
+            };
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            return { data: null, meta: undefined, error: { message: "Something went wrong", error } };
+        }
+    },
+
     getMedicineById: async (id: string) => {
         try {
 

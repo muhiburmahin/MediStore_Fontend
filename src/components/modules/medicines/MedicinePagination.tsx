@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Button } from "../../ui/button";
 import {
     ChevronLeft,
@@ -21,16 +21,18 @@ interface PaginationControls {
 export default function MedicinesPagination({ meta }: PaginationControls) {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const pathname = usePathname();
 
     const { limit, page, total, totalPages } = meta;
 
     const navigateToPage = (page: number) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set("page", page.toString());
-        router.push(`?${params.toString()}`);
+        const qs = params.toString();
+        router.push(qs ? `${pathname}?${qs}` : pathname);
     };
 
-    const start = page * limit - limit + 1;
+    const start = total === 0 ? 0 : page * limit - limit + 1;
     const end = Math.min(page * limit, total);
     return (
         <>

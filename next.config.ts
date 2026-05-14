@@ -1,4 +1,7 @@
-/** @type {import('next').NextConfig} */
+/**
+ * @type {import('next').NextConfig}
+ * Use `next build --webpack` in package.json: Next 16’s default Turbopack build can omit/break Tailwind v4 CSS on Vercel; webpack matches `next dev --webpack`.
+ */
 const nextConfig = {
     images: {
         remotePatterns: [
@@ -33,6 +36,22 @@ const nextConfig = {
             {
                 source: "/api/notifications/:path*",
                 destination: `${backend}/api/notifications/:path*`,
+            },
+            {
+                source: "/api/wishlist",
+                destination: `${backend}/api/wishlist`,
+            },
+            {
+                source: "/api/wishlist/:path*",
+                destination: `${backend}/api/wishlist/:path*`,
+            },
+            {
+                source: "/api/orders",
+                destination: `${backend}/api/orders`,
+            },
+            {
+                source: "/api/orders/:path*",
+                destination: `${backend}/api/orders/:path*`,
             },
         ];
     },

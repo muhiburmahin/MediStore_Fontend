@@ -34,7 +34,7 @@ interface CartItem {
 const checkoutSchema = z.object({
     fullName: z.string().min(3, "Full name is required"),
     phone: z.string().min(11, "Valid phone number is required").max(14),
-    address: z.string().min(10, "Detail address is required"),
+    address: z.string().min(8, "Enter a complete street address"),
     city: z.string().min(2, "City is required"),
 });
 
@@ -74,8 +74,13 @@ const ShippingForm = ({ formMethods }: { formMethods: UseFormReturn<CheckoutForm
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-[10px] font-black uppercase text-blue-600 ml-1">Full Address</label>
-                        <textarea {...register("address")} rows={2} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-600 rounded-xl p-3 outline-none transition-all text-sm" placeholder="House/Road/Area" />
+                        <label className="text-[10px] font-black uppercase text-blue-600 ml-1">Street address</label>
+                        <textarea
+                            {...register("address")}
+                            rows={4}
+                            className="min-h-[7rem] w-full resize-y bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-600 rounded-xl p-3 outline-none transition-all text-sm leading-relaxed"
+                            placeholder="House / flat, road, area, landmark (we save the full text for delivery)"
+                        />
                         {errors.address && <p className="text-red-500 text-[10px] font-bold">{errors.address.message}</p>}
                     </div>
 
@@ -87,7 +92,14 @@ const ShippingForm = ({ formMethods }: { formMethods: UseFormReturn<CheckoutForm
                 </div>
             </section>
 
-            {/* Cash on Delivery (Bangla removed) */}
+            {/* Cash on delivery — payment completed when order arrives */}
+            <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
+                <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                    Payment is not taken online for this option. You will pay in cash when the order is delivered. Order status will show{" "}
+                    <span className="font-black">Pending</span> until delivery.
+                </p>
+            </div>
+
             <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 p-4 rounded-xl flex items-center gap-3">
                 <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shrink-0">
                     <Banknote className="text-white" size={18} />
@@ -151,8 +163,6 @@ export default function CheckoutPage() {
 
     const dispatch = useDispatch();
     const cart = useSelector((state: RootState) => state.cart.items) as unknown as CartItem[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = useSelector((state: RootState) => (state as any).auth?.user);
 
     const formMethods = useForm<CheckoutFormValues>({
         resolver: zodResolver(checkoutSchema)
@@ -162,32 +172,38 @@ export default function CheckoutPage() {
         if (cart.length === 0) return toast.error("Cart is empty!");
         setIsSubmitting(true);
 
-        const subTotal = cart.reduce((acc, item) => acc + (item.medicine.price * item.quantity), 0);
-
         const orderPayload = {
-            customerId: user?.id,
-            items: cart.map(item => ({
+            items: cart.map((item) => ({
                 medicineId: item.medicine.id,
                 quantity: item.quantity,
-                price: item.medicine.price
             })),
-            shippingAddress: `${data.address}, ${data.city}`,
+            shippingAddress: [
+                `Recipient: ${data.fullName}`,
+                `Phone: ${data.phone}`,
+                `Address: ${data.address.trim()}`,
+                `City: ${data.city.trim()}`,
+            ].join("\n"),
             phone: data.phone,
-            fullName: data.fullName,
-            shippingFee: 0, // Zero as per request
-            totalAmount: subTotal
+            paymentMethod: "COD" as const,
         };
 
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const result = await createOrderAction(orderPayload as any);
-            if (result?.success) {
-                setOrderId(result.data?.id || result.data?._id || "SUCCESS");
+            const result = await createOrderAction(orderPayload);
+            if (result?.success && result.data) {
+                const inner = result.data as { order?: { id: string }; checkoutUrl?: string | null };
+                const oid = inner?.order?.id ?? (result.data as { id?: string })?.id ?? "";
+                setOrderId(oid || "SUCCESS");
                 setIsSuccess(true);
                 dispatch(clearCart());
-                toast.success("Order Placed Successfully!");
+                toast.success("Order placed — payment on delivery.");
+            } else {
+                const errMsg =
+                    result && typeof result === "object" && "error" in result
+                        ? String((result as { error?: { message?: string } }).error?.message ?? "Order failed")
+                        : "Order failed";
+                toast.error(errMsg);
             }
-        } catch (err) {
+        } catch {
             toast.error("Failed to place order.");
         } finally {
             setIsSubmitting(false);
@@ -197,8 +213,8 @@ export default function CheckoutPage() {
     if (isSuccess) return <OrderSuccess orderId={orderId} />;
 
     return (
-        <div className="bg-[#f8faff] dark:bg-slate-950 min-h-screen pb-10 transition-colors">
-            <div className="max-w-5xl mx-auto px-4 pt-8">
+        <div className="bg-[#f8faff] dark:bg-slate-950 min-h-[calc(100dvh-5.5rem)] pb-12 transition-colors">
+            <div className="mx-auto max-w-5xl px-4 pt-6 md:pt-10">
                 <div className="mb-8">
                     <Link href="/cart" className="flex items-center gap-1 text-blue-600 font-bold text-[10px] uppercase tracking-widest mb-2 hover:translate-x-[-4px] transition-transform">
                         <ChevronLeft size={14} /> Back to Cart

@@ -4,7 +4,8 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import {
     ShoppingCart, Star, Zap, ChevronRight, CheckCircle2,
-    ShieldCheck, Award, Loader2, MessageSquare, User, Calendar
+    ShieldCheck, Award, Loader2, MessageSquare, User, Calendar,
+    Package, Truck, Sparkles, AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -14,6 +15,7 @@ import { addToCart } from "@/store/slice/cartSlice";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Medicine } from "@/types/medicine.type";
 import { fetchMedicineById } from "@/actions/medicine.action";
+import { WishlistHeartButton } from "@/components/modules/wishlist/WishlistHeartButton";
 
 export default function MedicineDetails() {
     const { id } = useParams();
@@ -69,6 +71,8 @@ export default function MedicineDetails() {
     const totalReviews = medicine.totalReviews ?? 0;
     const starCounts = medicine.starCounts || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     const medicineId = medicine.id ? medicine.id.slice(0, 6) : "N/A";
+    const inStock = (medicine.stock ?? 0) > 0;
+    const lowStock = inStock && (medicine.stock ?? 0) < 15;
 
     return (
         <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 pb-20 transition-colors">
@@ -76,9 +80,15 @@ export default function MedicineDetails() {
 
                 {/* 1. Breadcrumb */}
                 <nav className="flex items-center gap-2 text-xs md:text-sm text-slate-500 mb-6 md:mb-8 font-medium overflow-x-auto whitespace-nowrap no-scrollbar">
-                    <Link href="/shop" className="hover:text-blue-600 transition-colors">Pharmacy</Link>
+                    <Link href="/shop" className="hover:text-blue-600 transition-colors shrink-0">Pharmacy</Link>
                     <ChevronRight className="w-4 h-4 shrink-0" />
-                    <span className="text-blue-600 font-semibold truncate">{medicine.name}</span>
+                    {medicine.category?.name && (
+                        <>
+                            <span className="shrink-0 text-slate-500">{medicine.category.name}</span>
+                            <ChevronRight className="w-4 h-4 shrink-0" />
+                        </>
+                    )}
+                    <span className="text-blue-600 font-semibold truncate min-w-0">{medicine.name}</span>
                 </nav>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
@@ -145,28 +155,66 @@ export default function MedicineDetails() {
                             </div>
 
                             <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-6">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-4xl md:text-5xl font-black text-blue-600">৳{medicine.price}</span>
-                                </div>
-
-                                <div className="flex items-center justify-between text-green-600 font-bold bg-green-50 dark:bg-green-900/10 p-4 rounded-2xl border border-green-100 dark:border-green-900/30">
-                                    <div className="flex items-center gap-3 text-sm md:text-base">
-                                        <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6" />
-                                        <span>In Stock - Fast Delivery</span>
+                                <div className="flex flex-wrap items-start justify-between gap-4">
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-4xl md:text-5xl font-black text-blue-600">৳{medicine.price}</span>
                                     </div>
-                                    <Zap className="w-4 h-4 md:w-5 md:h-5 fill-amber-400 text-amber-400 animate-pulse" />
+                                    <WishlistHeartButton medicineId={medicine.id} size="lg" className="shrink-0" />
                                 </div>
 
-                                {/* Updated Button with Blue & Green Gradient */}
+                                <div
+                                    className={`flex items-center justify-between font-bold p-4 rounded-2xl border ${
+                                        !inStock
+                                            ? "text-red-600 bg-red-50 dark:bg-red-950/25 border-red-200 dark:border-red-900/40"
+                                            : lowStock
+                                              ? "text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/40"
+                                              : "text-green-600 bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-900/30"
+                                    }`}
+                                >
+                                    <div className="flex min-w-0 items-center gap-3 text-sm md:text-base">
+                                        {!inStock ? (
+                                            <AlertTriangle className="h-5 w-5 shrink-0 md:h-6 md:w-6" />
+                                        ) : (
+                                            <CheckCircle2 className="h-5 w-5 shrink-0 md:h-6 md:w-6" />
+                                        )}
+                                        <span>
+                                            {!inStock
+                                                ? "Currently out of stock"
+                                                : lowStock
+                                                  ? `Low stock — only ${medicine.stock} left`
+                                                  : `In stock (${medicine.stock} available) — fast delivery`}
+                                        </span>
+                                    </div>
+                                    {inStock && !lowStock && (
+                                        <Zap className="h-4 w-4 shrink-0 fill-amber-400 text-amber-400 animate-pulse md:h-5 md:w-5" />
+                                    )}
+                                </div>
+
+                                <p className="rounded-xl border border-slate-100 bg-slate-50/90 p-3 text-xs leading-relaxed text-slate-600 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400">
+                                    <span className="font-bold text-slate-800 dark:text-slate-200">Payment: </span>
+                                    Card checkout where enabled, or cash on delivery at checkout. COD orders show as payment pending until you pay the delivery agent — no online charge before that.
+                                </p>
+
                                 <Button
                                     size="lg"
-                                    onClick={() => dispatch(addToCart({
-                                        medicine: { ...medicine, createdAt: String(medicine.createdAt), updatedAt: String(medicine.updatedAt) },
-                                        quantity: 1
-                                    }))}
-                                    className="w-full h-14 md:h-16 rounded-2xl bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-black text-lg md:text-xl shadow-lg transition-all active:scale-[0.98]"
+                                    disabled={!inStock}
+                                    onClick={() =>
+                                        inStock &&
+                                        dispatch(
+                                            addToCart({
+                                                medicine: {
+                                                    ...medicine,
+                                                    createdAt: String(medicine.createdAt),
+                                                    updatedAt: String(medicine.updatedAt),
+                                                },
+                                                quantity: 1,
+                                            })
+                                        )
+                                    }
+                                    className="h-14 w-full rounded-2xl bg-gradient-to-r from-blue-600 to-green-600 font-black text-lg text-white shadow-lg transition-all hover:from-blue-700 hover:to-green-700 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45 md:h-16 md:text-xl"
                                 >
-                                    <ShoppingCart className="mr-3 h-5 w-5 md:h-6 md:w-6 stroke-[3px]" /> Add to Shopping Bag
+                                    <ShoppingCart className="mr-3 h-5 w-5 stroke-[3px] md:h-6 md:w-6" />{" "}
+                                    {inStock ? "Add to Shopping Bag" : "Unavailable"}
                                 </Button>
                             </div>
                         </div>
